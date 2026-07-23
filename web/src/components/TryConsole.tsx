@@ -13,6 +13,8 @@ interface Result {
   positioningMemo: string; coverLetter: string; disclaimer: string; artifacts: Artifact[];
   limit_reached?: boolean; error?: string;
 }
+type FileKind = "pdf" | "docx" | "image";
+interface Picked { name: string; size: number; kind: FileKind; base64: string; mediaType: string }
 
 const SUBS = [
   ["keywordCoverage", "Keywords"],
@@ -20,6 +22,37 @@ const SUBS = [
   ["formatting", "Formatting"],
   ["completeness", "Completeness"],
 ] as const;
+
+const DOCX_TYPE = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+
+function detectKind(f: File): { kind: FileKind; mediaType: string } | null {
+  const t = (f.type || "").toLowerCase();
+  const n = f.name.toLowerCase();
+  if (t === "application/pdf" || n.endsWith(".pdf")) return { kind: "pdf", mediaType: "application/pdf" };
+  if (t.includes("wordprocessingml") || n.endsWith(".docx")) return { kind: "docx", mediaType: DOCX_TYPE };
+  if (t.startsWith("image/") || /\.(png|jpe?g|webp|gif)$/.test(n))
+    return { kind: "image", mediaType: t.startsWith("image/") ? t : "image/png" };
+  return null;
+}
+function prettySize(b: number): string {
+  return b < 1024 ? `${b} B` : b < 1_048_576 ? `${(b / 1024).toFixed(0)} KB` : `${(b / 1_048_576).toFixed(1)} MB`;
+}
+
+const IconUpload = (
+  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" aria-hidden>
+    <path d="M12 15V4M12 4l-4 4M12 4l4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M4 15v3a2 2 0 002 2h12a2 2 0 002-2v-3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+  </svg>
+);
+const FileGlyph = ({ kind }: { kind: FileKind }) => (
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden>
+    <path d="M6 2h8l4 4v14a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+    <path d="M14 2v4h4" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+    <text x="12" y="17" textAnchor="middle" fontSize="5.4" fontFamily="monospace" fontWeight="700" fill="currentColor">
+      {kind === "image" ? "IMG" : kind.toUpperCase()}
+    </text>
+  </svg>
+);
 
 function useCountUp(target: number, run: boolean, ms = 900) {
   const [n, setN] = useState(0);
@@ -43,10 +76,11 @@ export default function TryConsole() {
   const [jd, setJd] = useState("");
   const [busy, setBusy] = useState(false);
   const [locked, setLocked] = useState(false);
+  const [dragging, setDragging] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState<Result | null>(null);
+  const [file, setFile] = useState<Picked | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
-  const [file, setFile] = useState<{ name: string; kind: "pdf" | "image"; base64: string; mediaType: string } | null>(null);
 
   const after = useCountUp(result?.ats.scoreAfter ?? 0, !!result, 1000);
 
@@ -54,7 +88,7 @@ export default function TryConsole() {
     const r = rOverride ?? resume;
     const j = jOverride ?? jd;
     if ((!r.trim() && !file) || !j.trim()) {
-      setError("Add your résumé and a job description first.");
+      setError("Add your résumé (paste or upload) and a job description first.");
       return;
     }
     setBusy(true);
@@ -62,8 +96,8 @@ export default function TryConsole() {
     setResult(null);
     try {
       const body: Record<string, unknown> = { jobDescription: j };
-      if (r.trim()) body.resume = r;
       if (file) body.resumeFile = { kind: file.kind, base64: file.base64, mediaType: file.mediaType };
+      else if (r.trim()) body.resume = r;
       const res = await fetch("/try", {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -73,6 +107,7 @@ export default function TryConsole() {
       if (data.limit_reached) { setLocked(true); return; }
       if (!res.ok || data.error) { setError(data.error ?? "Something went wrong. Try again shortly."); return; }
       setResult(data);
+      setTimeout(() => document.getElementById("forge-result")?.scrollIntoView({ behavior: "smooth", block: "nearest" }), 60);
     } catch {
       setError("Couldn't reach the forge. Check your connection and retry.");
     } finally {
@@ -89,60 +124,111 @@ export default function TryConsole() {
     void run(ex.resume, ex.jobDescription);
   }
 
-  function onFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const f = e.target.files?.[0];
+  function pick(files: FileList | null | undefined) {
+    const f = files?.[0];
     if (!f) return;
-    const isPdf = f.type === "application/pdf";
+    const det = detectKind(f);
+    if (!det) { setError("Unsupported file. Upload a PDF, DOCX, PNG, or JPG."); return; }
+    if (f.size > 6_000_000) { setError("That file is over 6 MB. Try a smaller one."); return; }
     const reader = new FileReader();
     reader.onload = () => {
-      const b64 = String(reader.result).split(",")[1] ?? "";
-      setFile({ name: f.name, kind: isPdf ? "pdf" : "image", base64: b64, mediaType: isPdf ? "application/pdf" : f.type || "image/png" });
+      setError("");
+      setFile({ name: f.name, size: f.size, kind: det.kind, base64: String(reader.result).split(",")[1] ?? "", mediaType: det.mediaType });
+      setResume("");
     };
     reader.readAsDataURL(f);
+  }
+  function removeFile() {
+    setFile(null);
+    if (fileRef.current) fileRef.current.value = "";
   }
 
   const sub = (rec: Record<string, Sub | number>, key: string) => {
     const v = rec[key];
     return typeof v === "number" ? v : (v?.score ?? 0);
   };
+  const disabled = busy || locked;
 
   return (
-    <div className="console" id="console">
+    <div className="console" id="console-card">
+      {busy && <div className="forging-bar" aria-hidden />}
       <div className="console-bar">
         <span className="cdot a" /><span className="cdot b" /><span className="cdot c" />
-        <span className="title">resumurai · dojo</span>
-        <span className="live eyebrow dot-live" style={{ fontSize: 10 }}>live</span>
+        <span className="title">resumurai · forge</span>
+        <span className="live forge-live">live</span>
       </div>
       <div className="console-body">
         <div className="io-grid">
+          {/* résumé: paste or drag-drop upload */}
           <div className="field">
-            <label htmlFor="resume">
+            <label>
               <span>Your résumé</span>
-              <span className="attach" onClick={() => fileRef.current?.click()}>+ attach PDF / image</span>
+              {file && <span className="attach" onClick={removeFile}>remove</span>}
             </label>
-            <textarea id="resume" value={resume} disabled={busy || locked}
-              onChange={(e) => setResume(e.target.value)}
-              placeholder="Paste your résumé text — or attach a PDF/image and leave this blank." />
-            <input ref={fileRef} type="file" accept="application/pdf,image/*" hidden onChange={onFile} />
-            {file && (
-              <span className="attached">📎 {file.name}<button onClick={() => setFile(null)} aria-label="Remove file">✕</button></span>
-            )}
+            <div
+              className={`dropzone ${dragging ? "dragging" : ""}`}
+              onDragOver={(e) => { e.preventDefault(); if (!disabled) setDragging(true); }}
+              onDragLeave={(e) => { e.preventDefault(); setDragging(false); }}
+              onDrop={(e) => { e.preventDefault(); setDragging(false); if (!disabled) pick(e.dataTransfer.files); }}
+            >
+              {file ? (
+                <div className="file-card">
+                  <span className="file-ic"><FileGlyph kind={file.kind} /></span>
+                  <span className="file-meta">
+                    <b>{file.name}</b>
+                    <span>{prettySize(file.size)} · {file.kind === "image" ? "Image" : file.kind.toUpperCase()} ready to forge</span>
+                  </span>
+                  <button className="file-x" onClick={removeFile} aria-label="Remove file" disabled={disabled}>✕</button>
+                </div>
+              ) : (
+                <>
+                  <textarea
+                    value={resume}
+                    disabled={disabled}
+                    onChange={(e) => setResume(e.target.value)}
+                    placeholder="Paste your résumé here…"
+                  />
+                  <div className="dz-foot">
+                    <button type="button" className="dz-browse" disabled={disabled} onClick={() => fileRef.current?.click()}>
+                      {IconUpload} Upload PDF, DOCX or image
+                    </button>
+                    <span className="dz-hint">or drop a file</span>
+                  </div>
+                </>
+              )}
+              {dragging && <div className="dz-overlay"><span>{IconUpload} Drop to forge</span></div>}
+            </div>
+            <input
+              ref={fileRef}
+              type="file"
+              hidden
+              accept=".pdf,.docx,.png,.jpg,.jpeg,.webp,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/*"
+              onChange={(e) => pick(e.target.files)}
+            />
           </div>
+
+          {/* job description */}
           <div className="field">
             <label htmlFor="jd"><span>Target job description</span></label>
-            <textarea id="jd" value={jd} disabled={busy || locked}
+            <textarea
+              id="jd"
+              className="jd-area"
+              value={jd}
+              disabled={disabled}
               onChange={(e) => setJd(e.target.value)}
-              placeholder="Paste the full job posting you're aiming for." />
+              placeholder="Paste the full job posting you're aiming for."
+            />
           </div>
         </div>
 
         <div className="console-actions">
-          <button className="btn" onClick={() => run()} disabled={busy || locked}>
-            {busy ? "Sharpening…" : "Sharpen my résumé"} <span className="arrow">→</span>
+          <button className="btn" onClick={() => run()} disabled={disabled}>
+            {busy ? "Forging…" : "Sharpen my résumé"} <span className="arrow">→</span>
           </button>
           <div className="examples">
+            <span className="ex-label">or try:</span>
             {EXAMPLES.map((ex, i) => (
-              <button key={ex.label} className="chip" disabled={busy || locked} onClick={() => loadExample(i)}>
+              <button key={ex.label} className="chip" disabled={disabled} onClick={() => loadExample(i)}>
                 {ex.label}
               </button>
             ))}
@@ -152,62 +238,90 @@ export default function TryConsole() {
         {error && <p className="notice err">{error}</p>}
         {locked && (
           <p className="notice">
-            The free daily demo limit has been reached — it resets within 24 hours. Agents can call the paid
-            endpoint any time at <b style={{ color: "var(--gold)" }}>0.03 USDT</b> per résumé.
+            The free daily demo limit has been reached. It resets within 24 hours. Agents can call the paid
+            endpoint any time at <b style={{ color: "var(--gold-hot)" }}>0.03 USDT</b> per résumé.
           </p>
         )}
 
         {result && (
-          <div className="result">
-            <div className="score-row">
-              <div className="score-jump">
+          <div className="result" id="forge-result">
+            {/* 1 — score banner */}
+            <div className="res-score">
+              <span className="res-eyebrow">ATS match · <b>{result.role}</b>{result.company ? ` @ ${result.company}` : ""}</span>
+              <div className="res-score-nums">
                 <span className="score-big before">{result.ats.scoreBefore}</span>
                 <span className="score-to">→</span>
                 <span className="score-big after">{after}</span>
+                {result.ats.scoreAfter > result.ats.scoreBefore && (
+                  <span className="score-delta">+{result.ats.scoreAfter - result.ats.scoreBefore} points</span>
+                )}
+              </div>
+              <div className="res-bar">
+                <div className="res-bar-base" style={{ width: `${result.ats.scoreBefore}%` }} />
+                <div className="res-bar-gain" style={{ left: `${result.ats.scoreBefore}%`, width: `${Math.max(0, result.ats.scoreAfter - result.ats.scoreBefore)}%` }} />
+              </div>
+            </div>
+
+            {/* 2 — sub-metrics */}
+            <div className="res-metrics">
+              {SUBS.map(([key, label]) => {
+                const b = sub(result.ats.before, key);
+                const a = sub(result.ats.after, key);
+                return (
+                  <div className="metric" key={key}>
+                    <div className="metric-k">{label}</div>
+                    <div className="metric-v">{b} → <em>{a}</em></div>
+                    <div className="metric-bar">
+                      <i className="ghost" style={{ width: `${b}%` }} />
+                      <i className="fill" style={{ left: `${b}%`, width: `${Math.max(0, a - b)}%` }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* 3 — files */}
+            <div className="res-block">
+              <h4 className="res-h">Your files</h4>
+              <div className="downloads">
+                {result.artifacts.map((a) => (
+                  <a className="dl" key={a.url} href={a.url} download={a.filename}>⬇ {a.filename}</a>
+                ))}
+              </div>
+            </div>
+
+            {/* 4 — what changed */}
+            <div className="res-cols">
+              <div>
+                <h4 className="res-h up">Surfaced for this role</h4>
+                {result.gaps.injectedKeywords.length ? (
+                  <div className="tags">
+                    {result.gaps.injectedKeywords.map((k) => <span className="tag" key={k}>{k}</span>)}
+                  </div>
+                ) : (
+                  <p className="gap-empty">Nothing new needed to add.</p>
+                )}
               </div>
               <div>
-                <div className="score-meta">ATS match · {result.role}{result.company ? ` @ ${result.company}` : ""}</div>
-                <div className="subscores" style={{ marginTop: 12 }}>
-                  {SUBS.map(([key, label]) => (
-                    <div className="sub" key={key}>
-                      <div className="k">{label}</div>
-                      <div className="v">{sub(result.ats.before, key)}<span className="to"> → {sub(result.ats.after, key)}</span></div>
-                    </div>
-                  ))}
-                </div>
+                <h4 className="res-h down">Honest gaps to close</h4>
+                {result.gaps.notAddressable.length ? (
+                  <ul className="gap-list">
+                    {result.gaps.notAddressable.map((g, i) => <li key={i}>{g}</li>)}
+                  </ul>
+                ) : (
+                  <p className="gap-empty">None. You already cover the role.</p>
+                )}
               </div>
             </div>
 
-            <div className="gaps">
-              <div className="gap-box">
-                <h4>Truthfully surfaced</h4>
-                <div className="tags">
-                  {result.gaps.injectedKeywords.length
-                    ? result.gaps.injectedKeywords.map((k) => <span className="tag in" key={k}>{k}</span>)
-                    : <span className="score-meta">—</span>}
-                </div>
-              </div>
-              <div className="gap-box">
-                <h4>Honest gaps to close</h4>
-                <div className="tags">
-                  {result.gaps.notAddressable.length
-                    ? result.gaps.notAddressable.map((k) => <span className="tag miss" key={k}>{k}</span>)
-                    : <span className="score-meta">None — you cover the role.</span>}
-                </div>
-              </div>
-            </div>
-
+            {/* 5 — positioning */}
             {result.positioningMemo && (
-              <p className="memo"><b>Positioning</b>{result.positioningMemo}</p>
+              <div className="res-block">
+                <h4 className="res-h">Positioning</h4>
+                <div className="memo-box"><p className="memo-text">{result.positioningMemo}</p></div>
+              </div>
             )}
 
-            <div className="downloads">
-              {result.artifacts.map((a) => (
-                <a className="dl" key={a.url} href={a.url} download={a.filename}>
-                  ⬇ {a.filename}
-                </a>
-              ))}
-            </div>
             <p className="disclaimer">{result.disclaimer}</p>
           </div>
         )}

@@ -31,7 +31,7 @@ Go, Python, Postgres, Docker, k8s, AWS, Kafka, Jenkins, REST
 
 EDUCATION
 BS Computer Science, UT Austin (2012-2016)`,
-    jobDescription: `Senior Backend Engineer — Fintech Payments
+    jobDescription: `Senior Backend Engineer, Fintech Payments
 
 Requirements:
 - 5+ years of backend software engineering experience
@@ -66,7 +66,7 @@ Copywriting, Email, Social media, Google Analytics, Canva
 
 EDUCATION
 BA Communications, University of Michigan (2014-2018)`,
-    jobDescription: `Senior Product Marketing Manager — B2B SaaS
+    jobDescription: `Senior Product Marketing Manager, B2B SaaS
 
 Requirements:
 - 5+ years in product marketing for B2B SaaS

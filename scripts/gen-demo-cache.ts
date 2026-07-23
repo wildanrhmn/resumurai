@@ -1,6 +1,8 @@
 import "dotenv/config";
 import { writeFileSync } from "node:fs";
 import { runEngine } from "../src/engine/dispatch.js";
+import { buildArtifacts } from "../src/pipeline.js";
+import { gatherEvidence } from "../src/evidence/index.js";
 import { demoKey } from "../src/demo/cache.js";
 
 /**
@@ -87,8 +89,11 @@ const cache: Record<string, unknown> = {};
 for (const [i, ex] of EXAMPLES.entries()) {
   process.stderr.write(`[gen] example ${i + 1}/${EXAMPLES.length} …\n`);
   const result = await runEngine(ex);
-  cache[demoKey(ex.resume, ex.jobDescription)] = result;
-  process.stderr.write(`      ${result.role}: ${result.ats.scoreBefore} -> ${result.ats.scoreAfter}\n`);
+  const artifacts = await buildArtifacts(result);
+  const docx = artifacts.find((a) => /-Resume\.docx$/i.test(a.filename));
+  const evidence = await gatherEvidence({ role: result.role, resume: result.tailoredResume, docxBase64: docx?.base64 });
+  cache[demoKey(ex.resume, ex.jobDescription)] = { ...result, evidence };
+  process.stderr.write(`      ${result.role}: ${result.ats.scoreBefore} -> ${result.ats.scoreAfter} · ${evidence.length} evidence\n`);
 }
 
 writeFileSync(out, JSON.stringify(cache, null, 2));

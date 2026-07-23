@@ -101,7 +101,7 @@ async function main(): Promise<void> {
         if (hit) {
           const artifacts = await buildArtifacts(hit);
           res.setHeader("X-Demo-Cache", "hit");
-          res.json({ ...hit, artifacts });
+          res.json({ ...hit, evidence: hit.evidence ?? [], artifacts });
           return;
         }
       }

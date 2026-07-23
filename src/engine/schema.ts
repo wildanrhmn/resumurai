@@ -143,6 +143,18 @@ export interface AtsScore {
   completeness: SubScore; // 15%
 }
 
+/* ─────────────────── Evidence (external + deterministic) ────────────────── */
+
+export type EvidenceStatus = "pass" | "warn" | "info";
+
+/** A cited, verifiable fact about the tailored résumé — not the model's opinion. */
+export interface Evidence {
+  label: string; // short claim, e.g. "ATS parse check"
+  detail: string; // human sentence with the specifics
+  source: string; // "ESCO" | "O*NET" | "LanguageTool" | "Re-parse" | "Metrics"
+  status: EvidenceStatus;
+}
+
 /* ─────────────────────────── Public API result ─────────────────────────── */
 
 export interface Artifact {
@@ -172,6 +184,7 @@ export interface TailorResult {
   coverLetter: string;
   positioningMemo: string;
   tailoredResume: ResumeModel;
+  evidence: Evidence[];
   artifacts: Artifact[];
   disclaimer: string;
 }

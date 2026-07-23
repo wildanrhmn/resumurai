@@ -9,7 +9,7 @@
         "overall": 73,
         "keywordCoverage": {
           "score": 67,
-          "reason": "Missing 4/12 priority keywords: Go (Golang), Relational Data Modeling, CI/CD, Event-Driven Systems."
+          "reason": "Missing 4/12 priority keywords: Go (Golang), relational data modeling, CI/CD, event-driven systems."
         },
         "hardRequirements": {
           "score": 100,
@@ -47,42 +47,42 @@
     "gaps": {
       "missingKeywords": [
         "Go (Golang)",
-        "Relational Data Modeling",
+        "relational data modeling",
         "CI/CD",
-        "Event-Driven Systems"
+        "event-driven systems"
       ],
       "unmetHardRequirements": [],
       "injectedKeywords": [
         "Go (Golang)",
-        "Microservices",
+        "microservices",
         "PostgreSQL",
-        "Relational Data Modeling",
+        "relational data modeling",
         "AWS",
         "Docker",
         "Kubernetes",
         "CI/CD",
-        "REST API Design",
+        "REST API design",
         "Kafka",
-        "Event-Driven Systems",
-        "Payments"
+        "event-driven systems",
+        "backend software engineering"
       ],
       "notAddressable": [
-        "Formal ownership of observability tooling (metrics/dashboards/tracing) beyond on-call incident response is not evidenced in the resume",
-        "Explicit leadership of technical design reviews (beyond mentoring two engineers) is not evidenced in the resume"
+        "Design and operate reliable payment microservices at scale (explicit ownership of large-scale architecture decisions is not detailed in source resume beyond general reliability work)",
+        "Own observability and incident response (on-call/incident response is present, but specific observability tooling/ownership is not documented)",
+        "Mentor engineers and lead technical design (mentoring is documented; leading technical design specifically is not stated in source resume)"
       ]
     },
     "changeNotes": [
-      "Added a summary section positioning Alex directly for a senior fintech payments backend role, since none existed before.",
-      "Reworded vague bullets (e.g. 'lots of transactions', 'some Python for scripts') into specific, action-verb-led statements using the job posting's own terminology.",
-      "Relabeled 'Go' as 'Go (Golang)' and 'k8s' as 'Kubernetes' and 'Postgres' as 'PostgreSQL' to match ATS keyword matching without changing meaning.",
-      "Reframed the automated build/release bullet explicitly as CI/CD pipeline work to close that keyword gap.",
-      "Reframed the Kafka message queue work at DataCorp as 'event-driven systems' since that is a direct, honest description of the same work.",
-      "Added 'Relational Data Modeling' to skills and a related bullet since the candidate explicitly worked with Postgres schemas and built APIs on top of them.",
-      "Flagged formal observability ownership and technical design leadership as gaps rather than fabricating evidence for them.",
-      "Trimmed skills list to remove redundant/low-signal entries and added Payments Systems and REST API Design to align with the target role."
+      "Added a summary section (previously empty) to position Alex squarely for a senior backend/fintech payments role using only stated experience.",
+      "Rewrote PayStream bullets to lead with Go microservices, PostgreSQL data modeling, and REST API design, matching job terminology since the original resume already described this work informally.",
+      "Relabeled 'Amazon/containers' language as AWS, Docker, and Kubernetes since 'k8s' was already listed in skills, confirming real basis.",
+      "Reframed 'automated build and release' as CI/CD pipelines, a direct truthful rename of existing work.",
+      "Surfaced DataCorp's Kafka/message queue work as 'event-driven systems' since that is a direct, honest description of the described work.",
+      "Expanded and reordered skills list to foreground job-matching keywords (Go (Golang), PostgreSQL, relational data modeling, CI/CD, event-driven systems) while keeping all original tools.",
+      "Flagged large-scale architecture ownership, observability tooling, and technical design leadership as not explicitly supported, rather than fabricating specifics."
     ],
-    "coverLetter": "Dear Hiring Team,\n\nI'm writing to apply for the Senior Backend Engineer, Fintech Payments role. For the past five years at PayStream Inc, I've built and operated payment microservices in Go that handle high transaction volumes, backed by PostgreSQL data models and REST APIs consumed by other teams. I've deployed and run these services on AWS using Docker and Kubernetes, and built CI/CD pipelines that let our team ship changes to payment infrastructure faster and with more confidence. As part of the on-call rotation, I've led incident response efforts focused on keeping payment systems reliable under load.\n\nEarlier, at DataCorp, I built microservices and Kafka-based consumers that formed the backbone of an event-driven data pipeline, while also mentoring two junior engineers and running code reviews to raise the team's overall code quality.\n\nI'm drawn to this role because it sits squarely at the intersection of what I've spent my career doing: building reliable, scalable backend systems specifically for payments, with the operational rigor (containers, orchestration, CI/CD, incident response) that fintech demands. I'd welcome the chance to bring that experience to your team, help design and operate your payment microservices at scale, and continue growing as a mentor to other engineers.\n\nThank you for your consideration.\n\nAlex Chen",
-    "positioningMemo": "Alex has real, direct experience in almost everything this posting asks for: Go, microservices, Kafka/event-driven systems, PostgreSQL, AWS, Docker, Kubernetes, CI/CD, REST APIs, and payments domain work, so this resume should clear keyword-based ATS screens cleanly. In interviews, lean hard on the payment microservices and incident response work at PayStream since that's the closest one-to-one match to 'design and operate reliable payment microservices at scale' and 'own observability and incident response.' The honest gaps are around formal observability tooling ownership (metrics, tracing, dashboards) and leading technical design reviews rather than just mentoring, so be ready to speak candidly about the scope of past mentoring and on-call work and to show enthusiasm for growing into a more formal design-leadership capacity.",
+    "coverLetter": "Dear Hiring Manager,\n\nI'm excited to apply for the Senior Backend Engineer, Fintech Payments role. Over the past 8+ years I've built and operated backend payment systems that handle high transaction volumes, most recently as a Backend Developer at PayStream Inc, where I write Go microservices, design PostgreSQL data models, and build REST APIs consumed by other engineering teams.\n\nMy work spans the full lifecycle your team needs: deploying containerized services with Docker on AWS and Kubernetes, building CI/CD pipelines to ship changes faster and more reliably, and carrying on-call responsibility for production payment services where uptime and reliability are non-negotiable. Earlier, at DataCorp, I developed microservices and Kafka-based consumers as part of event-driven data processing systems, and mentored junior engineers through code review and pairing.\n\nI'm particularly drawn to this role's focus on designing reliable payment microservices at scale and mentoring engineers. I've spent my career close to both: writing the Go and Postgres-backed services that move money, and helping less experienced engineers grow. I'd welcome the chance to bring that combination of hands-on backend depth and mentorship to your payments platform.\n\nThank you for your consideration. I'd be glad to discuss how my experience with Go, Kafka, PostgreSQL, and cloud-native deployment can support your team's reliability and scaling goals.\n\nSincerely,\nAlex Chen",
+    "positioningMemo": "Alex's real experience (Go microservices, PostgreSQL, Kafka, AWS/Docker/Kubernetes, CI/CD, payment systems at scale) maps directly onto nearly every must-have keyword for this role, so the resume should clear ATS screening cleanly. In interviews, lean into the payment-processing domain experience and the Kafka/event-driven work at DataCorp, since fintech payments experience is a strong differentiator. Be ready to speak concretely about incident response and observability practices (specific tools, metrics, dashboards) and about instances of leading technical design decisions, since the resume shows reliability work and mentoring but doesn't detail ownership at an architectural or observability-tooling level, those are the honest gaps worth shoring up before the interview.",
     "tailoredResume": {
       "contact": {
         "name": "Alex Chen",
@@ -91,7 +91,7 @@
         "location": "Austin, TX",
         "links": []
       },
-      "summary": "Senior Backend Engineer with 8+ years designing and operating backend systems for payments processing platforms. Skilled in Go (Golang), microservices architecture, event-driven systems built on Kafka, and REST API design, with hands-on experience in PostgreSQL relational data modeling and deployments on AWS using Docker and Kubernetes. Proven track record building CI/CD pipelines, leading incident response for high-transaction-volume services, and mentoring engineers.",
+      "summary": "Backend software engineer with 8+ years building and operating payment systems handling high transaction volumes. Experienced in Go (Golang) microservices, event-driven architectures with Kafka, PostgreSQL relational data modeling, and cloud deployment on AWS with Docker and Kubernetes. Track record of building CI/CD pipelines to ship reliably, owning on-call reliability for production payment services, and mentoring engineers.",
       "experience": [
         {
           "company": "PayStream Inc",
@@ -100,12 +100,11 @@
           "start": "2019",
           "end": "Present",
           "bullets": [
-            "Designed and maintained payment microservices in Go (Golang) supporting a high-volume fintech payments platform.",
-            "Deployed and operated services on AWS using Docker containers and Kubernetes for orchestration, improving deployment consistency.",
-            "Built CI/CD pipelines to automate build and release processes, enabling faster, more reliable shipping of payment services.",
-            "Designed relational data models and REST APIs in PostgreSQL, giving other teams reliable programmatic access to payment data.",
-            "Wrote Python automation scripts to support backend operations and reduce manual toil.",
-            "Served in the on-call rotation, leading incident response and driving reliability improvements for payment infrastructure."
+            "Built and maintained payment microservices in Go (Golang) processing high volumes of financial transactions, with supporting Python scripts for tooling and automation",
+            "Designed and modeled relational data in PostgreSQL and built REST API design for internal payment endpoints consumed by other engineering teams",
+            "Deployed services on AWS using Docker containers, running on Kubernetes for orchestration and scaling",
+            "Built CI/CD pipelines to automate build, test, and release, enabling faster and more reliable shipping of payment services",
+            "Owned on-call rotation and incident response for production payment services, working to maintain reliability and uptime"
           ]
         },
         {
@@ -115,8 +114,8 @@
           "start": "2016",
           "end": "2019",
           "bullets": [
-            "Built microservices and Kafka-based message queue consumers, implementing event-driven systems for asynchronous data processing.",
-            "Conducted code reviews and mentored two junior engineers, helping raise team code quality standards."
+            "Developed microservices and Kafka-based message queue consumers as part of event-driven systems for backend data processing",
+            "Conducted code reviews and mentored two junior engineers, supporting their technical growth"
           ]
         }
       ],
@@ -124,17 +123,17 @@
         "Go (Golang)",
         "Python",
         "PostgreSQL",
-        "Relational Data Modeling",
+        "relational data modeling",
+        "microservices",
+        "event-driven systems",
+        "Kafka",
+        "REST API design",
+        "AWS",
         "Docker",
         "Kubernetes",
-        "AWS",
-        "Kafka",
-        "Event-Driven Systems",
-        "Microservices",
-        "REST API Design",
         "CI/CD",
         "Jenkins",
-        "Payments Systems"
+        "backend software engineering"
       ],
       "education": [
         {
@@ -149,19 +148,45 @@
       "certifications": [],
       "projects": []
     },
-    "disclaimer": "Resumurai reframes and sharpens your real experience. It never fabricates. Review every line and make sure each claim is accurate before you apply."
+    "disclaimer": "Resumurai reframes and sharpens your real experience. It never fabricates. Review every line and make sure each claim is accurate before you apply.",
+    "evidence": [
+      {
+        "label": "ATS parse check",
+        "detail": "Generated .docx re-parses to clean text: name and email extracted, 2/2 roles and 14/14 skills recovered.",
+        "source": "Re-parse",
+        "status": "pass"
+      },
+      {
+        "label": "Quantified impact",
+        "detail": "0% of experience bullets (0/7) include a concrete number or metric.",
+        "source": "Metrics",
+        "status": "info"
+      },
+      {
+        "label": "Strong action verbs",
+        "detail": "86% of bullets (6/7) lead with a strong action verb.",
+        "source": "Metrics",
+        "status": "pass"
+      },
+      {
+        "label": "Grammar & spelling",
+        "detail": "LanguageTool found no spelling or grammar issues in the tailored résumé.",
+        "source": "LanguageTool",
+        "status": "pass"
+      }
+    ]
   },
   "10a450ea1366cb747f355b7b7044cff45dff6267c079b10a4596d67bfa335063": {
     "role": "Senior Product Marketing Manager",
     "company": "",
     "ats": {
-      "scoreBefore": 51,
-      "scoreAfter": 88,
+      "scoreBefore": 54,
+      "scoreAfter": 85,
       "before": {
-        "overall": 51,
+        "overall": 54,
         "keywordCoverage": {
-          "score": 18,
-          "reason": "Missing 9/11 priority keywords: go-to-market strategy, product launch management, positioning, demand generation, conversion analytics, sales enablement content, competitive analysis, cross-functional leadership…."
+          "score": 25,
+          "reason": "Missing 9/12 priority keywords: B2B SaaS, Go-to-Market Strategy, Product Launch, Positioning, Demand Generation, Conversion Analytics, Sales Enablement Content, Competitive Analysis…."
         },
         "hardRequirements": {
           "score": 100,
@@ -177,10 +202,10 @@
         }
       },
       "after": {
-        "overall": 88,
+        "overall": 85,
         "keywordCoverage": {
-          "score": 91,
-          "reason": "Missing 1/11 priority keywords: competitive analysis."
+          "score": 83,
+          "reason": "Missing 2/12 priority keywords: Competitive Analysis, Cross-Functional Leadership."
         },
         "hardRequirements": {
           "score": 100,
@@ -198,45 +223,44 @@
     },
     "gaps": {
       "missingKeywords": [
-        "go-to-market strategy",
-        "product launch management",
-        "positioning",
-        "demand generation",
-        "conversion analytics",
-        "sales enablement content",
-        "competitive analysis",
-        "cross-functional leadership",
-        "B2B SaaS"
+        "B2B SaaS",
+        "Go-to-Market Strategy",
+        "Product Launch",
+        "Positioning",
+        "Demand Generation",
+        "Conversion Analytics",
+        "Sales Enablement Content",
+        "Competitive Analysis",
+        "Cross-Functional Leadership"
       ],
       "unmetHardRequirements": [],
       "injectedKeywords": [
-        "go-to-market strategy",
-        "product launch management",
-        "positioning",
-        "messaging frameworks",
-        "demand generation",
-        "funnel analytics",
-        "conversion analytics",
-        "sales enablement content",
-        "B2B SaaS"
+        "B2B SaaS",
+        "Go-to-Market Strategy",
+        "Product Launch",
+        "Positioning",
+        "Messaging Frameworks",
+        "Demand Generation",
+        "Funnel Analytics",
+        "Conversion Analytics",
+        "Sales Enablement Content"
       ],
       "notAddressable": [
-        "competitive analysis (no evidence of competitor research or battle cards in the resume)",
-        "cross-functional leadership (resume shows collaboration with sales and leadership, not formal leadership of cross-functional teams; reframed as cross-functional collaboration instead)",
-        "5+ years product marketing experience in B2B SaaS (BrightLeaf SaaS tenure since 2020 is clearly B2B SaaS, but Nomad Tools' SaaS/B2B status is unstated, so total confirmed B2B SaaS tenure cannot be honestly claimed at 5+ years without more detail)"
+        "Competitive Analysis (no evidence of formal competitor research or battlecard work in the resume)",
+        "Cross-Functional Leadership (resume shows collaboration with sales, not leading cross-functional teams)",
+        "Formal 'Product Marketing' title (candidate's title has been Marketing Manager/Associate; product marketing framing is a reasonable but not literal match)"
       ]
     },
     "changeNotes": [
-      "Added a summary section (previously blank) framed around go-to-market, positioning, and analytics language pulled directly from real BrightLeaf SaaS duties.",
-      "Reworded BrightLeaf bullets to lead with launch management, messaging, demand generation, and funnel/conversion analytics, using the job posting's terminology where the underlying work supports it.",
-      "Kept Nomad Tools bullet largely intact since it's lower-relevance early-career experience; did not stretch it to claim SaaS or B2B specifics not stated.",
-      "Expanded skills list to include Go-to-Market Strategy, Product Launch Management, Messaging Frameworks, Demand Generation, Funnel/Conversion Analytics, Sales Enablement Content, and B2B SaaS Marketing, all grounded in existing bullet content.",
-      "Did not claim 'cross-functional leadership' since the resume only shows collaboration with sales/leadership, not team leadership; used 'cross-functional collaboration' instead.",
-      "Flagged competitive analysis and the specific 5+ year B2B SaaS tenure requirement as gaps rather than fabricating support for them.",
-      "Preserved all employers, titles, and dates exactly as given."
+      "Rewrote summary to position candidate for a product marketing role using her real B2B SaaS tenure at BrightLeaf.",
+      "Reordered BrightLeaf bullets to lead with product launches, positioning, and sales enablement content since those map most directly to the target role.",
+      "Reframed the analytics bullet using 'funnel and conversion analytics' and 'demand generation' language that matches how she actually used the tools.",
+      "Added truthful keyword-aligned skills (Go-to-Market Strategy, Positioning & Messaging, Sales Enablement Content, Demand Generation) based on existing bullet content, removed nothing that was accurate.",
+      "Left Nomad Tools bullet largely intact as early-career, non-product-marketing experience rather than stretching it to fit.",
+      "Flagged Competitive Analysis and Cross-Functional Leadership as gaps rather than fabricating supporting bullets."
     ],
-    "coverLetter": "Dear Hiring Manager, I'm writing to express interest in the Senior Product Marketing Manager role. Over the past several years in B2B SaaS marketing, most recently as Marketing Manager at BrightLeaf SaaS, I've built hands-on experience across the core of this role: leading product launches, shaping positioning and messaging, and partnering closely with sales on enablement content like case studies and landing pages. I've also run demand generation campaigns across email and social, and I regularly dig into funnel and conversion analytics in Google Analytics to understand what's driving (or stalling) pipeline, then translate that into reporting for leadership. Before BrightLeaf, as a Marketing Associate at Nomad Tools, I supported events, content, and social strategy, which gave me a foundation in the day-to-day execution that good go-to-market work depends on. What I bring is a practical, cross-team approach: I don't just write messaging, I work with sales to make sure it actually gets used, and I don't just run campaigns, I track them through the funnel to see what's converting. I'm looking for a role where I can take on more ownership of go-to-market strategy and competitive positioning, and I'd welcome the chance to talk through how my BrightLeaf launch and analytics experience would translate into this position. Thank you for your consideration. Sincerely, Priya Nair",
-    "positioningMemo": "Priya's real strength is that her BrightLeaf SaaS bullets already map cleanly onto core PMM work (launches, messaging, sales enablement, funnel analytics) even though her title was 'Marketing Manager,' so lean into that functional overlap in interviews rather than the title gap. She should be ready to speak concretely about a specific launch she ran end to end and how she measured its funnel/conversion impact, since that's the strongest proof point she has. Honest gaps to shore up before interviews: she has no stated experience with formal competitive analysis (battle cards, win/loss, competitor positioning docs) and no clear track record of leading cross-functional teams versus collaborating with them, so she should be prepared to either address these directly or point to adjacent examples. It's also worth clarifying her exact tenure and the B2B/SaaS nature of Nomad Tools, since the '5+ years B2B SaaS' requirement is currently only clearly supported by her BrightLeaf years.",
+    "coverLetter": "Dear Hiring Team,\n\nI'm excited to apply for the Senior Product Marketing Manager role. Over the past several years at BrightLeaf SaaS, I've been closely involved in the work that sits at the center of this position: supporting product launches, shaping messaging in partnership with sales, and using funnel and conversion data to guide decisions that leadership relies on.\n\nIn my current role, I've partnered with sales teams to translate product positioning into content they can use directly with prospects, from case studies to landing pages, and I've run the email and social campaigns that turned that messaging into signups. I also regularly dig into funnel and conversion analytics in Google Analytics to understand where campaigns are working and where they're not, then bring those insights back to leadership to sharpen our go-to-market approach.\n\nBefore BrightLeaf, I built my foundation in marketing at Nomad Tools, supporting events, content, and social media, which gave me a broad view of how marketing programs come together end to end.\n\nI'm particularly drawn to roles where product marketing sits at the intersection of sales, demand generation, and product strategy, because that intersection is where I've spent most of my career operating. I'd welcome the chance to talk about how my experience with launches, messaging, and sales enablement content could contribute to your team's go-to-market goals.\n\nThank you for your consideration.\n\nPriya Nair",
+    "positioningMemo": "Priya's BrightLeaf SaaS tenure gives her a genuine, multi-year track record in the core mechanics of product marketing: launches, sales-facing content, messaging, and funnel reporting, even though her title was Marketing Manager rather than Product Marketing Manager. In interviews, she should lean hard into specifics: which launches she supported, what enablement content she wrote and how sales used it, and what the funnel data actually showed and changed. The honest gaps to address are formal competitive analysis experience and evidence of leading (versus contributing to) cross-functional initiatives; she should be ready to speak candidly about these and, if possible, point to any informal competitor tracking or cross-team coordination she can credibly describe.",
     "tailoredResume": {
       "contact": {
         "name": "Priya Nair",
@@ -245,7 +269,7 @@
         "location": "Remote",
         "links": []
       },
-      "summary": "B2B SaaS marketing professional with experience across product launch management, positioning and messaging development, demand generation, and funnel and conversion analytics. Comfortable partnering with sales teams to build enablement content and with leadership to report on campaign performance. Looking to bring this launch and messaging experience into a Senior Product Marketing Manager role.",
+      "summary": "B2B SaaS marketing professional with 5+ years of experience shaping product launches, messaging, and sales enablement content in a fast-paced software environment. Skilled at translating positioning into demand generation campaigns and using funnel and conversion analytics to report results to leadership and inform go-to-market decisions.",
       "experience": [
         {
           "company": "BrightLeaf SaaS",
@@ -254,10 +278,10 @@
           "start": "2020",
           "end": "Present",
           "bullets": [
-            "Led go-to-market execution for multiple product launches, coordinating positioning and messaging with sales and leadership stakeholders.",
-            "Developed messaging frameworks used across case studies, landing pages, and sales enablement content to support the sales team.",
-            "Ran demand generation campaigns across email and social channels, growing signups.",
-            "Tracked funnel and conversion analytics in Google Analytics and reported performance trends to leadership to inform marketing decisions."
+            "Supported go-to-market execution for multiple product launches, partnering with sales to shape launch messaging and positioning",
+            "Wrote sales enablement content, including case studies, landing pages, and blog posts, to support the sales team's conversations with prospects",
+            "Ran email and social campaigns tied to product messaging that grew signups, contributing to demand generation efforts",
+            "Tracked funnel and conversion metrics in Google Analytics and reported findings to leadership to guide campaign and messaging decisions"
           ]
         },
         {
@@ -267,26 +291,24 @@
           "start": "2018",
           "end": "2020",
           "bullets": [
-            "Supported event marketing and content creation while managing the social media content calendar."
+            "Supported event marketing and content production, and managed the social media calendar to maintain consistent brand presence"
           ]
         }
       ],
       "skills": [
+        "Product Marketing",
+        "B2B SaaS Marketing",
+        "Go-to-Market Strategy",
+        "Product Launch Support",
+        "Positioning & Messaging",
+        "Sales Enablement Content",
+        "Demand Generation",
+        "Funnel & Conversion Analytics",
         "Copywriting",
         "Email Marketing",
         "Social Media Marketing",
         "Google Analytics",
-        "Canva",
-        "Go-to-Market Strategy",
-        "Product Launch Management",
-        "Positioning and Messaging",
-        "Messaging Frameworks",
-        "Demand Generation",
-        "Funnel Analytics",
-        "Conversion Analytics",
-        "Sales Enablement Content",
-        "B2B SaaS Marketing",
-        "Cross-functional Collaboration"
+        "Canva"
       ],
       "education": [
         {
@@ -301,6 +323,32 @@
       "certifications": [],
       "projects": []
     },
-    "disclaimer": "Resumurai reframes and sharpens your real experience. It never fabricates. Review every line and make sure each claim is accurate before you apply."
+    "disclaimer": "Resumurai reframes and sharpens your real experience. It never fabricates. Review every line and make sure each claim is accurate before you apply.",
+    "evidence": [
+      {
+        "label": "ATS parse check",
+        "detail": "Generated .docx re-parses to clean text: name and email extracted, 2/2 roles and 13/13 skills recovered.",
+        "source": "Re-parse",
+        "status": "pass"
+      },
+      {
+        "label": "Quantified impact",
+        "detail": "0% of experience bullets (0/5) include a concrete number or metric.",
+        "source": "Metrics",
+        "status": "info"
+      },
+      {
+        "label": "Strong action verbs",
+        "detail": "20% of bullets (1/5) lead with a strong action verb.",
+        "source": "Metrics",
+        "status": "info"
+      },
+      {
+        "label": "Grammar & spelling",
+        "detail": "LanguageTool found no spelling or grammar issues in the tailored résumé.",
+        "source": "LanguageTool",
+        "status": "pass"
+      }
+    ]
   }
 }

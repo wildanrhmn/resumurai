@@ -9,7 +9,7 @@ import { extractDocxText } from "../parse/resume-file.js";
 const DISCLAIMER =
   "Resumurai reframes and sharpens your real experience. It never fabricates. Review every line and make sure each claim is accurate before you apply.";
 
-export type EngineResult = Omit<TailorResult, "artifacts">;
+export type EngineResult = Omit<TailorResult, "artifacts" | "evidence">;
 
 /** Remove em dashes everywhere (deterministic guarantee, independent of the model). */
 function stripEm(s: string): string {

@@ -1,6 +1,7 @@
 import type { TailorInput } from "./types.js";
 import type { Artifact, TailorResult } from "./engine/schema.js";
-import { runEngine } from "./engine/dispatch.js";
+import { runEngine, type EngineResult } from "./engine/dispatch.js";
+import { gatherEvidence } from "./evidence/index.js";
 import { renderResumeDocx } from "./render/resume-docx.js";
 import { renderResumePdf } from "./render/resume-pdf.js";
 import { renderCoverLetter } from "./render/cover-letter.js";
@@ -12,11 +13,26 @@ const MIME = {
   pdf: "application/pdf",
 } as const;
 
-/** Full pipeline: engine -> rendered artifacts -> complete API result. */
+/** Full pipeline: engine -> rendered artifacts + evidence -> complete API result. */
 export async function tailorResume(input: TailorInput): Promise<TailorResult> {
   const engine = await runEngine(input);
+  return finalize(engine);
+}
+
+/**
+ * Turn an engine result into the full response: render the files and gather evidence
+ * (both from the same tailored résumé). Used by the live path and by demo-cache hits
+ * that need fresh artifacts.
+ */
+export async function finalize(engine: EngineResult): Promise<TailorResult> {
   const artifacts = await buildArtifacts(engine);
-  return { ...engine, artifacts };
+  const docx = artifacts.find((a) => /-Resume\.docx$/i.test(a.filename));
+  const evidence = await gatherEvidence({
+    role: engine.role,
+    resume: engine.tailoredResume,
+    docxBase64: docx?.base64,
+  });
+  return { ...engine, evidence, artifacts };
 }
 
 export async function buildArtifacts(engine: {

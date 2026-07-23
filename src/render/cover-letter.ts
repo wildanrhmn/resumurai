@@ -33,7 +33,7 @@ export async function renderCoverLetter(contact: ResumeContact, text: string): P
 
   const doc = new Document({
     creator: "Resumurai",
-    title: `${contact.name || "Cover Letter"} — Cover Letter`,
+    title: `${contact.name || "Cover Letter"} · Cover Letter`,
     styles: { default: { document: { run: { font: FONT, size: SIZE.body } } } },
     sections: [
       {

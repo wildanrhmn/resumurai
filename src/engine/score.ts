@@ -107,7 +107,7 @@ function scoreFormatting(resume: ResumeModel, opts: ScoreOpts): SubScore {
   if (opts.guaranteedFormatting)
     return {
       score: 100,
-      reason: "Single-column, standard headings, no tables/graphics — cleanly parseable by any ATS.",
+      reason: "Single-column, standard headings, no tables or graphics, cleanly parseable by any ATS.",
     };
 
   let score = 100;

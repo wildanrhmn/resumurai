@@ -38,7 +38,7 @@ async function handleTailor(req: Request, res: Response): Promise<void> {
     if (isServiceUnavailableError(err)) {
       tripBreaker();
       res.status(503).set("Retry-After", "120").json({
-        error: "Service temporarily unavailable. No result was produced — please retry shortly.",
+        error: "Service temporarily unavailable. No result was produced. Please retry shortly.",
       });
       return;
     }
@@ -69,7 +69,7 @@ async function main(): Promise<void> {
   app.use((req, res, next) => {
     if (PAID_PATHS.has(req.path) && isBreakerOpen()) {
       res.status(503).set("Retry-After", "120").json({
-        error: "Service temporarily unavailable. No payment was taken — please retry shortly.",
+        error: "Service temporarily unavailable. No payment was taken. Please retry shortly.",
       });
       return;
     }

@@ -68,7 +68,7 @@ export function dailyBudget(req: Request, res: Response, next: NextFunction): vo
     const retry = Math.ceil((dayResetAt - now) / 1000);
     res.status(429).json({
       limit_reached: true,
-      error: "The free daily demo limit has been reached. It resets within 24 hours — or use the paid API endpoint.",
+      error: "The free daily demo limit has been reached. It resets within 24 hours, or use the paid API endpoint.",
       retry_after_seconds: retry,
     });
     return;

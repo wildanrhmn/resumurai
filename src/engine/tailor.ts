@@ -32,6 +32,9 @@ ALSO PRODUCE:
 - notAddressable: job must-haves/requirements with no honest basis in this resume.
 - changeNotes: 3-8 short notes on what you changed and why.
 - coverLetter: ~180-300 words, tailored, grounded only in real experience.
+
+STYLE: Do not use em dashes (the "—" character) anywhere in your output. Use commas, colons,
+periods, or parentheses instead. This applies to the resume, cover letter, memo, and every field.
 - positioningMemo: 2-5 candid sentences — why they can clear the filter, what to emphasize in
   interviews, and the honest gaps to shore up.`;
 

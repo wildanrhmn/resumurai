@@ -66,7 +66,7 @@ export function renderResumePdf(r: ResumeModel): Promise<Buffer> {
         heading("Projects");
         for (const p of r.projects) {
           doc.font(`${PDF_FONT}-Bold`).fontSize(PDF_SIZE.body).fillColor(ink)
-            .text(p.name + (p.detail ? ` — ${p.detail}` : ""));
+            .text(p.name + (p.detail ? ` · ${p.detail}` : ""));
           for (const b of p.bullets) bullet(b);
         }
       }

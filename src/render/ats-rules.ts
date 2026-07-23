@@ -54,7 +54,7 @@ export function expLine(e: {
   start: string;
   end: string;
 }): { left: string; right: string } {
-  const left = [e.title, e.company].filter(Boolean).join(" — ");
+  const left = [e.title, e.company].filter(Boolean).join(", ");
   const dates = [e.start, e.end].filter(Boolean).join(" – ");
   const right = [e.location, dates].filter(Boolean).join(" · ");
   return { left, right };

@@ -87,7 +87,7 @@ export async function renderResumeDocx(r: ResumeModel): Promise<Buffer> {
           spacing: { before: 60, after: 20 },
           children: [
             new TextRun({ text: p.name, bold: true, size: SIZE.body, font: FONT }),
-            ...(p.detail ? [new TextRun({ text: ` — ${p.detail}`, size: SIZE.body, font: FONT })] : []),
+            ...(p.detail ? [new TextRun({ text: ` · ${p.detail}`, size: SIZE.body, font: FONT })] : []),
           ],
         }),
       );
@@ -121,7 +121,7 @@ export async function renderResumeDocx(r: ResumeModel): Promise<Buffer> {
 
   const doc = new Document({
     creator: "Resumurai",
-    title: `${r.contact.name || "Resume"} — Resume`,
+    title: `${r.contact.name || "Resume"} · Resume`,
     styles: { default: { document: { run: { font: FONT, size: SIZE.body } } } },
     sections: [
       {

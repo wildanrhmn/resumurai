@@ -7,10 +7,11 @@ interface Ats {
   before: Record<string, Sub | number>; after: Record<string, Sub | number>;
 }
 interface Artifact { filename: string; mimeType: string; url: string }
+interface EvidenceItem { label: string; detail: string; source: string; status: "pass" | "warn" | "info" }
 interface Result {
   role: string; company: string; ats: Ats;
   gaps: { missingKeywords: string[]; injectedKeywords: string[]; notAddressable: string[]; unmetHardRequirements: string[] };
-  positioningMemo: string; coverLetter: string; disclaimer: string; artifacts: Artifact[];
+  positioningMemo: string; coverLetter: string; disclaimer: string; artifacts: Artifact[]; evidence?: EvidenceItem[];
   limit_reached?: boolean; error?: string;
 }
 type FileKind = "pdf" | "docx" | "image";
@@ -280,7 +281,25 @@ export default function TryConsole() {
               })}
             </div>
 
-            {/* 3 — files */}
+            {/* 3 — verified evidence */}
+            {result.evidence && result.evidence.length > 0 && (
+              <div className="res-block">
+                <h4 className="res-h">Evidence (independently checked)</h4>
+                <ul className="ev-list">
+                  {result.evidence.map((e, i) => (
+                    <li className={`ev ev-${e.status}`} key={i}>
+                      <span className="ev-ic">{e.status === "pass" ? "✓" : e.status === "warn" ? "!" : "•"}</span>
+                      <span className="ev-body">
+                        <span className="ev-head"><b>{e.label}</b><span className="ev-src">{e.source}</span></span>
+                        <span className="ev-detail">{e.detail}</span>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* 4 — files */}
             <div className="res-block">
               <h4 className="res-h">Your files</h4>
               <div className="downloads">

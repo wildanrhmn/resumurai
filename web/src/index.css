@@ -383,6 +383,19 @@ section { position: relative; padding-block: clamp(90px, 12vw, 150px); scroll-ma
 .gap-list li::before { content: ""; position: absolute; left: 3px; top: 8px; width: 6px; height: 6px; border-radius: 1.5px; background: var(--steel); transform: rotate(45deg); }
 .gap-empty { color: var(--muted); font-size: 0.95rem; margin: 0; }
 
+/* evidence */
+.ev-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.ev { display: flex; gap: 13px; align-items: flex-start; border: 1px solid var(--line); border-radius: 10px; padding: 13px 15px; background: rgba(10, 10, 13, 0.3); }
+.ev-ic { flex-shrink: 0; width: 22px; height: 22px; display: grid; place-items: center; border-radius: 6px; font-size: 12px; font-weight: 700; line-height: 1; }
+.ev-pass .ev-ic { background: rgba(255, 140, 60, 0.14); color: var(--gold-hot); border: 1px solid rgba(255, 140, 60, 0.35); }
+.ev-warn .ev-ic { background: rgba(255, 180, 90, 0.1); color: #ffcf8a; border: 1px solid rgba(255, 180, 90, 0.3); }
+.ev-info .ev-ic { background: rgba(156, 150, 139, 0.1); color: var(--muted); border: 1px solid var(--line-2); }
+.ev-body { min-width: 0; }
+.ev-head { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+.ev-head b { color: var(--paper); font-size: 0.95rem; font-weight: 600; }
+.ev-src { font-family: var(--code); font-size: 10px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted-2); border: 1px solid var(--line-2); border-radius: 4px; padding: 1px 6px; }
+.ev-detail { display: block; margin-top: 5px; font-size: 0.9rem; color: var(--muted); line-height: 1.5; }
+
 /* positioning */
 .memo-box { border: 1px solid var(--line); border-left: 2px solid var(--ember); border-radius: 0 10px 10px 0; background: rgba(255,106,26,0.04); padding: 18px 20px; }
 .memo-text { margin: 0; color: var(--muted); font-size: 0.97rem; line-height: 1.65; }

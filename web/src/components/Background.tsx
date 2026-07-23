@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 
-/** Ambient: two fixed indigo glows + a slow drift of faint gold forge-sparks. */
+/** Molten-forge ambient: warm radial heat + rising embers on canvas. */
 export default function Background() {
   const ref = useRef<HTMLCanvasElement>(null);
 
@@ -14,41 +14,56 @@ export default function Background() {
     let raf = 0;
     let w = 0;
     let h = 0;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
     const resize = () => {
-      w = canvas.width = window.innerWidth;
-      h = canvas.height = window.innerHeight;
+      w = window.innerWidth;
+      h = window.innerHeight;
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+      canvas.style.width = `${w}px`;
+      canvas.style.height = `${h}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
     resize();
     window.addEventListener("resize", resize);
 
-    const N = Math.min(46, Math.floor(window.innerWidth / 34));
-    const sparks = Array.from({ length: N }, (_, i) => ({
+    const COLORS = ["255,170,60", "255,120,30", "230,169,43", "255,196,77"];
+    const N = Math.min(70, Math.floor(window.innerWidth / 24));
+    const make = (i: number, atBottom: boolean) => ({
       x: Math.random() * w,
-      y: Math.random() * h,
-      r: 0.5 + Math.random() * 1.4,
-      vy: -0.05 - Math.random() * 0.16,
-      vx: (Math.random() - 0.5) * 0.12,
-      a: 0.05 + Math.random() * 0.28,
-      tw: Math.random() * Math.PI * 2,
-      // vary by index so no Math.random-at-render dependency for seed determinism
-      s: 0.4 + (i % 5) * 0.12,
-    }));
+      y: atBottom ? h + Math.random() * 40 : Math.random() * h,
+      r: 0.6 + Math.random() * 1.8,
+      vy: -0.15 - Math.random() * 0.5,
+      vx: (Math.random() - 0.5) * 0.25,
+      life: 0,
+      max: 200 + Math.random() * 260,
+      col: COLORS[i % COLORS.length],
+      sw: Math.random() * Math.PI * 2,
+      bright: Math.random() < 0.12,
+    });
+    const embers = Array.from({ length: N }, (_, i) => make(i, false));
 
     const draw = () => {
       ctx.clearRect(0, 0, w, h);
-      for (const p of sparks) {
+      ctx.globalCompositeOperation = "lighter";
+      for (let i = 0; i < embers.length; i++) {
+        const p = embers[i]!;
+        p.life++;
         p.y += p.vy;
-        p.x += p.vx;
-        p.tw += 0.02;
-        if (p.y < -5) { p.y = h + 5; p.x = Math.random() * w; }
-        const flick = p.a * (0.6 + 0.4 * Math.sin(p.tw));
+        p.x += p.vx + Math.sin(p.sw + p.life * 0.02) * 0.12;
+        const t = p.life / p.max;
+        if (t >= 1 || p.y < -20) Object.assign(p, make(i, true));
+        const fade = Math.sin(Math.min(1, t) * Math.PI); // rise-in, fade-out
+        const a = fade * (p.bright ? 0.9 : 0.5);
+        const flick = 0.7 + 0.3 * Math.sin(p.sw + p.life * 0.2);
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(224, 167, 43, ${flick})`;
-        ctx.shadowBlur = 6;
-        ctx.shadowColor = "rgba(244, 193, 78, 0.5)";
+        ctx.arc(p.x, p.y, p.r * (p.bright ? 1.4 : 1), 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${p.col}, ${a * flick})`;
+        ctx.shadowBlur = p.bright ? 14 : 8;
+        ctx.shadowColor = `rgba(${p.col}, 0.8)`;
         ctx.fill();
       }
+      ctx.globalCompositeOperation = "source-over";
       ctx.shadowBlur = 0;
       raf = requestAnimationFrame(draw);
     };
@@ -62,19 +77,20 @@ export default function Background() {
 
   return (
     <>
-      <div aria-hidden className="bg-glow" style={glowStyle} />
+      <div aria-hidden style={glow} />
       <canvas ref={ref} aria-hidden style={canvasStyle} />
     </>
   );
 }
 
-const glowStyle: React.CSSProperties = {
+const glow: React.CSSProperties = {
   position: "fixed",
   inset: 0,
   zIndex: -2,
   pointerEvents: "none",
   background:
-    "radial-gradient(700px 500px at 78% -6%, rgba(224,167,43,0.10), transparent 60%)," +
-    "radial-gradient(900px 700px at 8% 12%, rgba(28,33,66,0.9), transparent 62%)",
+    "radial-gradient(900px 600px at 82% -8%, rgba(255,106,26,0.12), transparent 58%)," +
+    "radial-gradient(700px 900px at 6% 108%, rgba(255,140,60,0.10), transparent 60%)," +
+    "radial-gradient(1200px 700px at 50% 120%, rgba(230,169,43,0.06), transparent 65%)",
 };
 const canvasStyle: React.CSSProperties = { position: "fixed", inset: 0, zIndex: -1, pointerEvents: "none" };

@@ -1,5 +1,5 @@
 export interface Attachment {
-  kind: "image" | "pdf";
+  kind: "image" | "pdf" | "docx";
   base64: string;
   mediaType: string;
 }

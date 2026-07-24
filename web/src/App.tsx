@@ -8,14 +8,21 @@ import TryConsole from "./components/TryConsole";
 
 gsap.registerPlugin(useGSAP, SplitText, ScrollTrigger);
 
-const Katana = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden>
-    <path d="M3 21L18 6" stroke="url(#g)" strokeWidth="2.1" strokeLinecap="round" />
-    <path d="M18 6l3-3-1.4 3.6L18 6z" fill="#ffc44d" />
-    <path d="M3 21l-1 1M5 19l1.6 1.6" stroke="#6f6a62" strokeWidth="1.7" strokeLinecap="round" />
+/** "Clean cut" — a solid block sliced and offset. Gradient defined once in <MoltenDefs/>. */
+const Mark = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="20 20 60 60" fill="none" aria-hidden>
+    <path d="M22 24 h56 v22 L22 66 Z" fill="url(#rm-molten)" />
+    <path d="M22 74 L78 54 v22 H22 Z" fill="url(#rm-molten)" opacity="0.5" />
+  </svg>
+);
+
+const MoltenDefs = () => (
+  <svg width="0" height="0" aria-hidden style={{ position: "absolute" }}>
     <defs>
-      <linearGradient id="g" x1="3" y1="21" x2="21" y2="3" gradientUnits="userSpaceOnUse">
-        <stop stopColor="#ff6a1a" /><stop offset="1" stopColor="#ffc44d" />
+      <linearGradient id="rm-molten" x1="0" y1="1" x2="1" y2="0">
+        <stop offset="0" stopColor="#ff5e0e" />
+        <stop offset="0.55" stopColor="#ff8f3c" />
+        <stop offset="1" stopColor="#ffd873" />
       </linearGradient>
     </defs>
   </svg>
@@ -108,11 +115,12 @@ export default function App() {
 
   return (
     <div ref={scope}>
+      <MoltenDefs />
       <Background />
 
       <nav className="nav">
         <div className="inner">
-          <a className="brand" href="/"><Katana className="mark" /> Resumurai</a>
+          <a className="brand" href="/"><Mark className="mark" /> Resumurai</a>
           <div className="nav-links">
             <a href="#forge">The forge</a>
             <a href="#console">Test it</a>
@@ -227,7 +235,7 @@ export default function App() {
         <div className="inner">
           <div className="wordmark" aria-hidden>RESUMURAI</div>
           <div className="footer-row">
-            <div className="brand"><Katana className="mark" /> Resumurai</div>
+            <div className="brand"><Mark className="mark" /> Resumurai</div>
             <div className="meta">Sharpen your real experience. Never fabricate.</div>
           </div>
           <div className="footer-credit">

@@ -1,101 +1,163 @@
-# Resumurai 🗡️
+<p align="center">
+  <img src="docs/logo.png" width="96" height="96" alt="Resumurai" />
+</p>
 
-**Slice your résumé to cut through the ATS.**
+<h1 align="center">Resumurai</h1>
 
-Resumurai is an [OKX.AI](https://www.okx.ai) Agent Service Provider (ASP). Give it your
-résumé and a target job description; it scores your résumé against the role's applicant
-tracking system (ATS), reforges it for that exact role, and hands back a real **ATS-safe
-`.docx` and `.pdf`** — plus a tailored cover letter and an honest gap analysis.
+<p align="center"><b>Reforge your résumé. Cut through the ATS.</b></p>
 
-It sharpens your real experience. **It never fabricates.**
+<p align="center">
+  An <a href="https://www.okx.ai">OKX.AI</a> Agent Service Provider that scores a résumé against a
+  specific job, reforges it for that exact role, and returns real ATS-safe files.<br/>
+  Every result is <b>independently checked</b>, and it never fabricates experience.
+</p>
 
-- **Paid endpoint (A2MCP):** `POST /x402/tailor` — pay-per-call over [x402](https://github.com/okx/payments), 0.03 USDT on X Layer.
-- **Free web demo:** paste a résumé + job at the site and watch the ATS score get sharpened.
+<p align="center">
+  <code>POST /x402/tailor</code> · 0.03 USDT per call · x402 on X Layer
+</p>
 
-## How it works
+---
+
+## What it does
+
+Give it a **résumé** (pasted text, or a PDF / DOCX / image upload) and a **target job description**. It returns:
+
+- **An ATS score, before and after**, with a per-component breakdown you can audit
+- **A rewritten, role-tailored résumé** as a real **ATS-safe `.docx`** and a styled **`.pdf`**
+- **A tailored cover letter**
+- **A gap analysis**: keywords it truthfully surfaced, and the honest gaps it could not close
+- **Cited evidence** from independent sources (see below)
+
+## Not just an LLM wrapper
+
+Two things here are **not** the model's opinion:
+
+**1. The ATS score is deterministic.** It is computed in code, not guessed by Claude, so it is reproducible and auditable:
+
+| Component | Weight | What it measures |
+| --- | --- | --- |
+| Keyword coverage | 40% | Priority keywords for the role, present in the résumé (synonym-aware) |
+| Hard requirements | 25% | Years of experience, degree, certifications actually met |
+| Formatting | 20% | Single column, standard headings, no tables or graphics, parseable |
+| Completeness | 15% | Summary, quantified achievements, relevant sections |
+
+**2. Every result carries an evidence trail.** Four independent sources run in parallel on the finished résumé. Each is best effort: a slow or failing source is dropped rather than blocking the result.
 
 ```mermaid
 flowchart LR
-  A[Résumé + Job description] --> B[Extract JD spec<br/>keywords · requirements]
-  A --> C[Parse résumé<br/>faithful structured model]
-  B & C --> D[Score BEFORE<br/>deterministic ATS]
-  D --> E[Reforge<br/>truthful tailoring]
-  E --> F[Score AFTER]
-  E --> G[Render<br/>.docx · .pdf · cover letter]
-  F & G --> H[ATS before→after · gaps · files]
+  T["Tailored résumé<br/>+ rendered .docx"]
+  T --> A["Re-parse<br/>deterministic"]
+  T --> B["O*NET<br/>US Dept of Labor"]
+  T --> C["Metrics<br/>deterministic"]
+  T --> D["LanguageTool<br/>grammar service"]
+  A --> E["Evidence, cited<br/>and independently checked"]
+  B --> E
+  C --> E
+  D --> E
 ```
 
-The design principle is **plan → render**: the language model (Claude) decides *content and
-structure* (a zod-validated tailoring spec); deterministic code renders the actual files. The
-model never emits file bytes or controls layout, so every résumé comes out single-column,
-standard-headed, and cleanly parseable — the format that actually passes an ATS.
+| Source | What it proves | Type |
+| --- | --- | --- |
+| **Re-parse** | The generated `.docx` is run back through a parser to confirm the name, email, every role and every skill survive extraction. Proof it is machine readable, not a claim that it is. | Deterministic |
+| **O*NET** | The US Department of Labor occupational standard. The role is matched to an occupation and the résumé is checked against its real technology list. The public-domain database ships with the app, so this works offline with no API key. | Authoritative, external |
+| **Metrics** | Share of bullets with a concrete number, and share leading with a strong action verb. | Deterministic |
+| **LanguageTool** | A real grammar and spelling service confirms the rewritten résumé is clean. | External service |
 
-### The ATS score
+## Truthful tailoring
 
-Deterministic and explainable — never guessed by the model:
+Resumurai may reword, reorder, reframe and surface experience the résumé already supports, and it may add a keyword only when there is an honest basis for it. It never invents employers, titles, dates, degrees, certifications or metrics. Anything it cannot honestly incorporate is reported as a gap instead.
 
-| Component | Weight | What it measures |
-|---|---|---|
-| Keyword coverage | 40% | Priority keywords from the JD present in the résumé (with synonyms) |
-| Hard requirements | 25% | Years of experience, degree, certifications actually met |
-| Formatting | 20% | Single-column, standard headings, no tables/graphics — parseable |
-| Completeness | 15% | Summary, quantified achievements, relevant sections |
+## How it works
 
-### The honesty guardrail
+The design principle is **plan, then render**: Claude decides content and structure, and deterministic code produces the actual files. The model never emits file bytes or controls layout, which is why every résumé comes out single column, standard headed and cleanly parseable.
 
-Resumurai reframes and surfaces experience the résumé already supports, and uses the job's own
-terminology where truthful. Any keyword or requirement it **can't** honestly incorporate is
-reported as a gap — never invented. Fabricated résumés get people rejected or fired; this one
-is built not to.
+```mermaid
+flowchart TD
+  IN["Résumé: text, PDF, DOCX or image<br/>+ target job description"]
+  IN --> JD["Extract job spec<br/>Claude"]
+  IN --> RP["Parse résumé<br/>Claude, verbatim"]
+  JD --> S1["Score BEFORE<br/>deterministic"]
+  RP --> S1
+  S1 --> TL["Reforge for the role<br/>Claude, truthful guardrail"]
+  TL --> S2["Score AFTER<br/>deterministic"]
+  TL --> RN["Render<br/>.docx · .pdf · cover letter"]
+  RN --> EV["Evidence layer<br/>4 independent checks"]
+  S2 --> OUT["Result"]
+  RN --> OUT
+  EV --> OUT
+```
+
+DOCX uploads are extracted to text server side with `mammoth`; PDFs and images are read by Claude's document and vision input.
+
+## API
+
+`POST /x402/tailor` is the paid agent endpoint (`GET` is also gated, for the OKX x402 probe). `POST /try` is the free path used by the website.
+
+```jsonc
+// request
+{
+  "resume": "…text…",                                  // or resumeFile
+  "resumeFile": { "kind": "pdf|docx|image", "base64": "…", "mediaType": "…" },
+  "jobDescription": "…the target job posting…",
+  "options": { "includeCoverLetter": true }
+}
+```
+
+```jsonc
+// response (abridged)
+{
+  "role": "Senior Backend Engineer",
+  "ats": { "scoreBefore": 74, "scoreAfter": 96, "before": {…}, "after": {…} },
+  "gaps": { "injectedKeywords": [...], "notAddressable": [...] },
+  "evidence": [
+    { "label": "ATS parse check", "source": "Re-parse", "status": "pass",
+      "detail": "Generated .docx re-parses to clean text: 2/2 roles and 13/13 skills recovered." }
+  ],
+  "positioningMemo": "…",
+  "artifacts": [
+    { "filename": "Alex-Chen-Resume.docx", "mimeType": "…", "base64": "…", "url": "/artifacts/…" }
+  ]
+}
+```
+
+Payment uses the `exact` scheme, **0.03 USDT** on **X Layer** (`eip155:196`), settled through the OKX Payment SDK. A circuit breaker rejects requests *before* the payment gate whenever the engine cannot serve, so a buyer is never charged for nothing.
 
 ## Develop
 
 ```bash
 cp .env.example .env          # add ANTHROPIC_API_KEY; leave PAYMENTS_ENABLED=false for dev
 npm install
-npm run dev                   # backend on :8792 (open mode, no payment)
+npm run dev                   # API on :8792 (open mode, no payment)
 
-# in another shell, the site (proxies /try etc. to :8792):
-npm --prefix web install
+npm --prefix web install      # the site, in another shell
 npm --prefix web run dev
 ```
 
-Offline checks:
+Checks:
 
 ```bash
-npm test                      # deterministic scoring unit tests
+npm test                          # deterministic scoring unit tests
 npx tsx scripts/smoke-engine.ts   # live engine (needs ANTHROPIC_API_KEY)
-npx tsx scripts/smoke-full.ts .   # engine + render -> writes real .docx/.pdf
+npx tsx scripts/smoke-full.ts .   # engine + render, writes real .docx/.pdf
 ```
 
-## Build & run
+## Build and run
 
 ```bash
-npm run build:all             # builds web/dist then compiles the server
-npm start                     # serves API + site on :8792
+npm run build:all             # builds web/dist, then compiles the server
+npm start                     # serves the API and the site on :8792
 npm run gen:demo-cache        # regenerate the $0 demo cache for the site examples
 ```
 
-## API
+The two website examples are precomputed (engine result *and* evidence), so clicking them is instant and costs nothing.
 
-`POST /x402/tailor` (also `GET` for the OKX x402 probe) — x402-gated in production.
+## Stack
 
-```jsonc
-// request
-{ "resume": "…text…", "jobDescription": "…text…",
-  "resumeFile": { "kind": "pdf|image", "base64": "…", "mediaType": "application/pdf" },  // optional
-  "options": { "includeCoverLetter": true } }
-
-// response (abridged)
-{ "role": "…", "ats": { "scoreBefore": 68, "scoreAfter": 91, "before": {…}, "after": {…} },
-  "gaps": { "injectedKeywords": [...], "notAddressable": [...] },
-  "positioningMemo": "…", "coverLetter": "…",
-  "artifacts": [ { "filename": "…-Resume.docx", "mimeType": "…", "base64": "…", "url": "/artifacts/…" } ] }
-```
-
-Payment: `exact` scheme, **0.03 USDT** on **X Layer** (`eip155:196`), settled via the OKX Payment
-SDK. Free web calls hit a demo cache for fixed examples and are rate-limited + daily-budgeted.
+TypeScript, Express, Claude (structured output via zod), `docx` and `pdfkit` for rendering, `mammoth` for DOCX input, the OKX x402 packages for payment, and React 19 with Vite SSG for the site.
 
 ---
 
-From the same dojo as [Scaminja 🥷](https://scaminja.app).
+<p align="center">
+  <sub>Skills data from O*NET® (U.S. Department of Labor). Grammar checks by LanguageTool.</sub><br/>
+  <sub><b>Resumurai sharpens your real experience. It never fabricates.</b></sub>
+</p>

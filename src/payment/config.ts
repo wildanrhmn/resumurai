@@ -28,7 +28,7 @@ export function loadPaymentConfig(): PaymentConfig {
     enabled: process.env.PAYMENTS_ENABLED === "true",
     payTo: process.env.PAY_TO_ADDRESS ?? "",
     price: { amount: toAtomic(process.env.PRICE ?? "0.03", USDT0_DECIMALS), asset: USDT0_ADDRESS },
-    maxTimeoutSeconds: Number(process.env.MAX_TIMEOUT_SECONDS ?? 120),
+    maxTimeoutSeconds: Number(process.env.MAX_TIMEOUT_SECONDS ?? 300),
     okx: {
       apiKey: process.env.OKX_API_KEY ?? "",
       secretKey: process.env.OKX_SECRET_KEY ?? "",

@@ -247,7 +247,7 @@ export default function App() {
   );
 }
 
-const CURL = `curl -X POST https://resumurai.app/x402/tailor \\
+const CURL = `curl -X POST https://resumurai.xyz/x402/tailor \\
   -H "content-type: application/json" \\
   -d '{
     "resume": "…your résumé text…",

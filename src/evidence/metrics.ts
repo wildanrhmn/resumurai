@@ -16,6 +16,12 @@ const ACTION_VERBS = new Set([
 
 const firstWord = (s: string) => s.trim().split(/\s+/)[0]?.toLowerCase().replace(/[^a-z]/g, "") ?? "";
 
+/** A bullet leads with an action verb if the first word is a known verb or a past-tense (-ed) verb. */
+function leadsWithActionVerb(bullet: string): boolean {
+  const w = firstWord(bullet);
+  return ACTION_VERBS.has(w) || (w.length > 3 && w.endsWith("ed"));
+}
+
 export function metricsEvidence(r: ResumeModel): Evidence[] {
   const bullets = r.experience.flatMap((e) => e.bullets).filter((b) => b.trim().length > 0);
   const out: Evidence[] = [];
@@ -30,7 +36,7 @@ export function metricsEvidence(r: ResumeModel): Evidence[] {
     status: qPct >= 50 ? "pass" : qPct >= 25 ? "warn" : "info",
   });
 
-  const strong = bullets.filter((b) => ACTION_VERBS.has(firstWord(b))).length;
+  const strong = bullets.filter(leadsWithActionVerb).length;
   const vPct = Math.round((strong / bullets.length) * 100);
   out.push({
     label: "Strong action verbs",

@@ -16,10 +16,10 @@ alexchen@email.com | Austin, TX
 
 WORK
 Backend Developer, PayStream Inc (2019 - Present)
-- Responsible for payment services handling lots of transactions
+- Responsible for payment services handling about 2 million transactions a day
 - Used Go and some Python for scripts
 - Deployed everything on Amazon and used containers
-- Set up automated build and release so we could ship faster
+- Set up automated build and release, cut deploy time by about 40%
 - Worked with the databases, mostly Postgres, and made APIs for other teams
 - On call for incidents, tried to keep things reliable
 Software Engineer, DataCorp (2016 - 2019)

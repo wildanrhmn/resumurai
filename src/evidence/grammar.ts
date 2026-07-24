@@ -25,21 +25,37 @@ function resumeProse(r: ResumeModel): string {
   return parts.join("\n").slice(0, 18_000);
 }
 
+/** One POST attempt. The free tier is 20 req/min per IP, so a burst can transiently 429. */
+async function check(text: string, timeoutMs: number): Promise<Response | null> {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), timeoutMs);
+  try {
+    return await fetch(LT_URL(), {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded", Accept: "application/json" },
+      body: new URLSearchParams({ text, language: "en-US", disabledRules: DISABLED }),
+      signal: ctrl.signal,
+    });
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(t);
+  }
+}
+
 export async function grammarEvidence(resume: ResumeModel): Promise<Evidence[]> {
   const text = resumeProse(resume);
   if (text.length < 40) return [];
 
-  const ctrl = new AbortController();
-  const t = setTimeout(() => ctrl.abort(), 7000);
   try {
-    const body = new URLSearchParams({ text, language: "en-US", disabledRules: DISABLED });
-    const res = await fetch(LT_URL(), {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded", Accept: "application/json" },
-      body,
-      signal: ctrl.signal,
-    });
-    if (!res.ok) return [];
+    let res = await check(text, 8000);
+    // Retry once after a short backoff: a transient 429/timeout should not silently
+    // drop the whole evidence line.
+    if (!res || !res.ok) {
+      await new Promise((r) => setTimeout(r, 1800));
+      res = await check(text, 8000);
+    }
+    if (!res || !res.ok) return [];
     const json = (await res.json()) as { matches?: { rule?: { issueType?: string } }[] };
     const matches = json.matches ?? [];
     // Count real issues; ignore purely stylistic/typographical noise.
@@ -61,7 +77,5 @@ export async function grammarEvidence(resume: ResumeModel): Promise<Evidence[]> 
     ];
   } catch {
     return [];
-  } finally {
-    clearTimeout(t);
   }
 }

@@ -143,6 +143,7 @@ export default function App() {
             <div className="stat"><b>.docx + .pdf</b><span>ATS-safe output</span></div>
             <div className="stat"><b className="hot-word">0.03 USDT</b><span>per résumé</span></div>
             <div className="stat"><b>Zero</b><span>fabrication</span></div>
+            <div className="stat"><b>Evidence</b><span>O*NET · LanguageTool · re-parse</span></div>
           </div>
         </div>
       </header>
@@ -228,6 +229,9 @@ export default function App() {
           <div className="footer-row">
             <div className="brand"><Katana className="mark" /> Resumurai</div>
             <div className="meta">Sharpen your real experience. Never fabricate.</div>
+          </div>
+          <div className="footer-credit">
+            Role skills data from O*NET® (U.S. Department of Labor). Grammar checks by LanguageTool.
           </div>
         </div>
       </footer>

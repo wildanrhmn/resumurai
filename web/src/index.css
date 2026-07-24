@@ -433,6 +433,7 @@ section { position: relative; padding-block: clamp(90px, 12vw, 150px); scroll-ma
 .footer-row .meta { color: var(--muted-2); font-size: 13.5px; }
 .footer-row .dojo { color: var(--muted); font-size: 13.5px; }
 .footer-row .dojo a { color: var(--gold-hot); }
+.footer-credit { position: relative; margin-top: 18px; font-size: 11.5px; color: var(--muted-2); }
 
 /* ============================ reveal / a11y ============================ */
 .reveal { opacity: 0; transform: translateY(26px); }

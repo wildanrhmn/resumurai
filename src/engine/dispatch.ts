@@ -2,9 +2,16 @@ import type { TailorInput } from "../types.js";
 import type { TailorResult } from "./schema.js";
 import { extractJd } from "./extract-jd.js";
 import { parseResume } from "./parse-resume.js";
-import { tailor } from "./tailor.js";
+import { tailor, writeCoverLetter } from "./tailor.js";
 import { scoreResume } from "./score.js";
 import { extractDocxText } from "../parse/resume-file.js";
+import { fastModel } from "./claude.js";
+
+/** How much latency budget the run has. The paid A2MCP path uses "fast" (the buyer's HTTP
+ *  client times out); the website /try path uses "quality" (a human is waiting, so quality wins). */
+export interface EngineOptions {
+  fast?: boolean;
+}
 
 const DISCLAIMER =
   "Resumurai reframes and sharpens your real experience. It never fabricates. Review every line and make sure each claim is accurate before you apply.";
@@ -29,7 +36,11 @@ function deepStrip<T>(v: T): T {
  * Full analyze -> score(before) -> tailor -> score(after) pipeline, WITHOUT file rendering.
  * Rendering (artifacts) is layered on in src/render. This keeps the engine offline-testable.
  */
-export async function runEngine(input: TailorInput): Promise<EngineResult> {
+export async function runEngine(input: TailorInput, opts: EngineOptions = {}): Promise<EngineResult> {
+  // In fast mode the parse/extract/tailor calls run on the quicker model so the paid
+  // response beats the buyer's HTTP timeout. Quality mode leaves them on the default model.
+  const m = opts.fast ? fastModel() : undefined;
+
   const jdText = (input.jobDescription ?? "").trim();
   if (!jdText) throw new Error("jobDescription is required (jobUrl fetching is added in a later phase)");
 
@@ -50,8 +61,8 @@ export async function runEngine(input: TailorInput): Promise<EngineResult> {
 
   // Structured JD + faithful structured resume, in parallel.
   const [jd, original] = await Promise.all([
-    extractJd(jdText),
-    parseResume(fileForClaude ? { file: fileForClaude, text: rawResumeText } : { text: rawResumeText }),
+    extractJd(jdText, m),
+    parseResume(fileForClaude ? { file: fileForClaude, text: rawResumeText } : { text: rawResumeText }, m),
   ]);
 
   // Score the ORIGINAL (formatting assessed from raw text when we have it).
@@ -60,18 +71,32 @@ export async function runEngine(input: TailorInput): Promise<EngineResult> {
     rawText: rawResumeText || undefined,
   });
 
-  // Reforge.
-  const spec = await tailor({
-    resume: original,
-    jd,
-    missingKeywords: before.missingKeywords,
-    unmetHardRequirements: before.unmetHardRequirements,
-  });
+  const includeCover = input.options?.includeCoverLetter !== false;
+
+  // Reforge the resume, and (when wanted) write the cover letter concurrently. The cover
+  // letter draws from the ORIGINAL real resume + JD, so it needs nothing from the rewrite and
+  // adds no latency to the critical path.
+  const [spec, coverLetter] = await Promise.all([
+    tailor(
+      {
+        resume: original,
+        jd,
+        missingKeywords: before.missingKeywords,
+        unmetHardRequirements: before.unmetHardRequirements,
+      },
+      m,
+    ),
+    includeCover ? writeCoverLetter({ resume: original, jd }, m) : Promise.resolve(""),
+  ]);
 
   // Score the TAILORED version (our renderer guarantees ATS-safe formatting).
   const after = scoreResume(spec.resume, jd, { guaranteedFormatting: true });
 
-  const includeCover = input.options?.includeCoverLetter !== false;
+  // Reconcile the model's own two lists: a keyword can't be both truthfully "injected" and an
+  // honest gap. If it landed in both, trust the conservative signal (notAddressable) and drop it
+  // from injected. Deterministic, so it holds regardless of which model wrote the spec.
+  const gaps = new Set(spec.notAddressable.map((k) => k.toLowerCase().trim()));
+  const injectedKeywords = spec.injectedKeywords.filter((k) => !gaps.has(k.toLowerCase().trim()));
 
   const result: EngineResult = {
     role: jd.role,
@@ -85,11 +110,11 @@ export async function runEngine(input: TailorInput): Promise<EngineResult> {
     gaps: {
       missingKeywords: before.missingKeywords,
       unmetHardRequirements: before.unmetHardRequirements,
-      injectedKeywords: spec.injectedKeywords,
+      injectedKeywords,
       notAddressable: spec.notAddressable,
     },
     changeNotes: spec.changeNotes,
-    coverLetter: includeCover ? spec.coverLetter : "",
+    coverLetter,
     positioningMemo: spec.positioningMemo,
     tailoredResume: spec.resume,
     disclaimer: DISCLAIMER,

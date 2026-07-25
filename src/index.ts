@@ -23,11 +23,11 @@ const ROUTE_KEYS = ["POST /x402/tailor", "GET /x402/tailor"];
 
 /* ─────────────────────────────── core handler ──────────────────────────── */
 
-async function handleTailor(req: Request, res: Response): Promise<void> {
+async function handleTailor(req: Request, res: Response, fast: boolean): Promise<void> {
   try {
     const raw = req.method === "POST" && req.body && Object.keys(req.body).length ? req.body : req.query;
     const input = validateInput(raw);
-    const result = await tailorResume(input);
+    const result = await tailorResume(input, { fast });
     closeBreaker();
     res.json(result);
   } catch (err) {
@@ -58,6 +58,20 @@ async function main(): Promise<void> {
     res.setHeader("X-Content-Type-Options", "nosniff");
     res.setHeader("X-Frame-Options", "DENY");
     res.setHeader("Referrer-Policy", "no-referrer");
+    next();
+  });
+
+  // Request timing — log the work paths so latency regressions are visible (the app was
+  // previously silent, which made the paid-endpoint timeout hard to diagnose).
+  const LOGGED = /^\/(x402\/tailor|try)$/;
+  app.use((req, res, next) => {
+    if (!LOGGED.test(req.path)) return next();
+    const start = Date.now();
+    res.on("finish", () => {
+      const ms = Date.now() - start;
+      const cache = res.getHeader("X-Demo-Cache") ? " cache=hit" : "";
+      console.log(`[req] ${req.method} ${req.path} ${res.statusCode} ${ms}ms${cache}`);
+    });
     next();
   });
 
@@ -111,12 +125,12 @@ async function main(): Promise<void> {
     next();
   }
 
-  // Free website demo path.
-  app.post("/try", demoCache, demoLimiter, dailyBudget, handleTailor);
+  // Free website demo path — quality tier (a human is waiting, latency is fine).
+  app.post("/try", demoCache, demoLimiter, dailyBudget, (req, res) => handleTailor(req, res, false));
 
-  // Paid A2MCP endpoint.
-  app.post("/x402/tailor", paidLimiter, handleTailor);
-  app.get("/x402/tailor", paidLimiter, handleTailor);
+  // Paid A2MCP endpoint — fast tier so the response beats the buyer's HTTP read timeout.
+  app.post("/x402/tailor", paidLimiter, (req, res) => handleTailor(req, res, true));
+  app.get("/x402/tailor", paidLimiter, (req, res) => handleTailor(req, res, true));
 
   // Content negotiation: site for browsers, machine manifest for agents.
   app.get("/", (req, res) => {

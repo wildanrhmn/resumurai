@@ -1,6 +1,6 @@
 import type { TailorInput } from "./types.js";
-import type { Artifact, TailorResult } from "./engine/schema.js";
-import { runEngine, type EngineResult } from "./engine/dispatch.js";
+import type { Artifact, Evidence, TailorResult } from "./engine/schema.js";
+import { runEngine, type EngineOptions, type EngineResult } from "./engine/dispatch.js";
 import { gatherEvidence } from "./evidence/index.js";
 import { renderResumeDocx } from "./render/resume-docx.js";
 import { renderResumePdf } from "./render/resume-pdf.js";
@@ -14,9 +14,31 @@ const MIME = {
 } as const;
 
 /** Full pipeline: engine -> rendered artifacts + evidence -> complete API result. */
-export async function tailorResume(input: TailorInput): Promise<TailorResult> {
-  const engine = await runEngine(input);
-  return finalize(engine);
+export async function tailorResume(input: TailorInput, opts: EngineOptions = {}): Promise<TailorResult> {
+  const engine = await runEngine(input, opts);
+  return finalize(engine, opts);
+}
+
+// Evidence is independently-verified and best-effort. LanguageTool's public API can be slow
+// (retry + timeouts), and on the paid path we must not let it push the response past the
+// buyer's HTTP timeout. Cap the whole gather; if it overruns we ship the deliverable without
+// the evidence block (the resume, score, and artifacts — what the buyer paid for — are unaffected).
+const EVIDENCE_BUDGET_MS = () => Number(process.env.EVIDENCE_BUDGET_MS ?? 4500);
+
+function withBudget<T>(p: Promise<T>, ms: number, fallback: T): Promise<T> {
+  return new Promise((resolve) => {
+    const t = setTimeout(() => resolve(fallback), ms);
+    p.then(
+      (v) => {
+        clearTimeout(t);
+        resolve(v);
+      },
+      () => {
+        clearTimeout(t);
+        resolve(fallback);
+      },
+    );
+  });
 }
 
 /**
@@ -24,14 +46,18 @@ export async function tailorResume(input: TailorInput): Promise<TailorResult> {
  * (both from the same tailored résumé). Used by the live path and by demo-cache hits
  * that need fresh artifacts.
  */
-export async function finalize(engine: EngineResult): Promise<TailorResult> {
+export async function finalize(engine: EngineResult, opts: EngineOptions = {}): Promise<TailorResult> {
   const artifacts = await buildArtifacts(engine);
   const docx = artifacts.find((a) => /-Resume\.docx$/i.test(a.filename));
-  const evidence = await gatherEvidence({
+  const gather = gatherEvidence({
     role: engine.role,
     resume: engine.tailoredResume,
     docxBase64: docx?.base64,
   });
+  // Only the latency-sensitive paid path caps evidence; quality mode waits for the full set.
+  const evidence: Evidence[] = opts.fast
+    ? await withBudget(gather, EVIDENCE_BUDGET_MS(), [])
+    : await gather.catch(() => []);
   return { ...engine, evidence, artifacts };
 }
 

@@ -14,7 +14,10 @@ not an edit: transcribe exactly what is present. Do NOT rewrite, improve, add, o
 type FileInput = { kind: "image" | "pdf"; base64: string; mediaType: string };
 
 /** Parse resume from plain text, or from an uploaded file (image/PDF). */
-export function parseResume(input: { text?: string; file?: FileInput }): Promise<ResumeModel> {
+export function parseResume(
+  input: { text?: string; file?: FileInput },
+  model?: string,
+): Promise<ResumeModel> {
   let content: string | Anthropic.Messages.MessageParam["content"];
 
   if (input.file) {
@@ -41,5 +44,5 @@ export function parseResume(input: { text?: string; file?: FileInput }): Promise
     content = `Resume:\n\n${input.text ?? ""}`;
   }
 
-  return parseWith(ResumeModel, { system: SYSTEM, content, maxTokens: 4096 });
+  return parseWith(ResumeModel, { system: SYSTEM, content, maxTokens: 4096, model });
 }

@@ -15,6 +15,11 @@ export function getClient(): Anthropic {
 
 export const model = () => process.env.MODEL ?? "claude-sonnet-5";
 export const ocrModel = () => process.env.OCR_MODEL ?? "claude-haiku-4-5";
+// Fast tier for the PAID A2MCP path: a full Sonnet tailoring run generates ~6k tokens
+// (~42s), which overruns the buyer's HTTP read timeout. Haiku generates the same output
+// far faster so the paid call completes well inside that window. The website /try path
+// stays on the quality model — latency doesn't matter for a human staring at a spinner.
+export const fastModel = () => process.env.FAST_MODEL ?? "claude-haiku-4-5";
 const timeoutMs = () => Number(process.env.ANALYZE_TIMEOUT_MS ?? 90_000);
 
 type Content = string | Anthropic.Messages.MessageParam["content"];

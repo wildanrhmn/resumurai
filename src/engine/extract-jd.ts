@@ -15,10 +15,11 @@ Rules:
 - responsibilities: the core outcomes/duties, so a resume can be reframed toward them.
 - Be faithful to the posting. If the company or industry is not stated, use an empty string.`;
 
-export function extractJd(jobDescription: string): Promise<JDSpec> {
+export function extractJd(jobDescription: string, model?: string): Promise<JDSpec> {
   return parseWith(JDSpec, {
     system: SYSTEM,
     content: `Job description:\n\n${jobDescription}`,
     maxTokens: 2048,
+    model,
   });
 }

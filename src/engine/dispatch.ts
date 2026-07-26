@@ -4,7 +4,7 @@ import { extractJd } from "./extract-jd.js";
 import { parseResume } from "./parse-resume.js";
 import { tailor, writeCoverLetter } from "./tailor.js";
 import { scoreResume } from "./score.js";
-import { extractDocxText } from "../parse/resume-file.js";
+import { extractDocxText, extractPdfText } from "../parse/resume-file.js";
 import { fastModel } from "./claude.js";
 
 /** How much latency budget the run has. The paid A2MCP path uses "fast" (the buyer's HTTP
@@ -83,12 +83,17 @@ export async function runEngine(input: TailorInput, opts: EngineOptions = {}): P
   if (input.resumeFile) {
     if (input.resumeFile.kind === "docx") {
       rawResumeText = await extractDocxText(input.resumeFile.base64);
-    } else if (input.resumeFile.kind === "pdf" || input.resumeFile.kind === "image") {
-      fileForClaude = {
-        kind: input.resumeFile.kind,
-        base64: input.resumeFile.base64,
-        mediaType: input.resumeFile.mediaType,
-      };
+    } else if (input.resumeFile.kind === "pdf") {
+      // Fast path: pull the PDF's text layer server-side (~1s) and parse it as text.
+      // Only scanned/image PDFs (no text layer) fall back to the slow vision path.
+      const text = await extractPdfText(input.resumeFile.base64);
+      if (text.length >= 200) {
+        rawResumeText = text;
+      } else {
+        fileForClaude = { kind: "pdf", base64: input.resumeFile.base64, mediaType: input.resumeFile.mediaType };
+      }
+    } else if (input.resumeFile.kind === "image") {
+      fileForClaude = { kind: "image", base64: input.resumeFile.base64, mediaType: input.resumeFile.mediaType };
     }
   }
 

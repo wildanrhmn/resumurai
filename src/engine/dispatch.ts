@@ -1,5 +1,5 @@
 import type { TailorInput } from "../types.js";
-import type { TailorResult } from "./schema.js";
+import type { TailorResult, ResumeModel } from "./schema.js";
 import { extractJd } from "./extract-jd.js";
 import { parseResume } from "./parse-resume.js";
 import { tailor, writeCoverLetter } from "./tailor.js";
@@ -17,6 +17,39 @@ const DISCLAIMER =
   "Resumurai reframes and sharpens your real experience. It never fabricates. Review every line and make sure each claim is accurate before you apply.";
 
 export type EngineResult = Omit<TailorResult, "artifacts" | "evidence">;
+
+/**
+ * Deterministic backstop for the truthful-tailoring rule: a rewrite may reorder and reword,
+ * but it must NEVER drop a real job, degree, or the candidate's identity. Fast models
+ * occasionally omit older experience entries, which erases tenure and tanks the ATS score.
+ * Rebuild from the original so every entry survives (the tailored text where the model kept
+ * it, the original verbatim where it dropped it), in the original order.
+ */
+function preserveStructure(original: ResumeModel, tailored: ResumeModel): ResumeModel {
+  const core = (s: string) => s.toLowerCase().replace(/\b(pt|cv|pte|ltd|inc|co|llc|tbk)\b/g, "").replace(/[^a-z0-9]/g, "");
+  const year = (s: string) => (s.match(/\d{4}/) ?? [""])[0];
+  const key = (e: ResumeModel["experience"][number]) => core(e.company) + "|" + year(e.start);
+
+  const byKey = new Map(tailored.experience.map((e) => [key(e), e]));
+  const experience = original.experience.map((orig) => byKey.get(key(orig)) ?? orig);
+  const origKeys = new Set(original.experience.map(key));
+  for (const t of tailored.experience) if (!origKeys.has(key(t))) experience.push(t); // defensive; normally none
+
+  return {
+    ...tailored,
+    contact: {
+      name: tailored.contact.name || original.contact.name,
+      email: tailored.contact.email || original.contact.email,
+      phone: tailored.contact.phone || original.contact.phone,
+      location: tailored.contact.location || original.contact.location,
+      links: tailored.contact.links?.length ? tailored.contact.links : original.contact.links,
+    },
+    experience,
+    education: tailored.education?.length ? tailored.education : original.education,
+    certifications: tailored.certifications?.length ? tailored.certifications : original.certifications,
+    projects: tailored.projects?.length ? tailored.projects : original.projects,
+  };
+}
 
 /** Remove em dashes everywhere (deterministic guarantee, independent of the model). */
 function stripEm(s: string): string {
@@ -89,8 +122,11 @@ export async function runEngine(input: TailorInput, opts: EngineOptions = {}): P
     includeCover ? writeCoverLetter({ resume: original, jd }, m) : Promise.resolve(""),
   ]);
 
+  // Guard against dropped jobs/degrees before scoring so the score reflects the real, complete résumé.
+  const tailoredResume = preserveStructure(original, spec.resume);
+
   // Score the TAILORED version (our renderer guarantees ATS-safe formatting).
-  const after = scoreResume(spec.resume, jd, { guaranteedFormatting: true });
+  const after = scoreResume(tailoredResume, jd, { guaranteedFormatting: true });
 
   // Reconcile the model's own two lists: a keyword can't be both truthfully "injected" and an
   // honest gap. If it landed in both, trust the conservative signal (notAddressable) and drop it
@@ -116,7 +152,7 @@ export async function runEngine(input: TailorInput, opts: EngineOptions = {}): P
     changeNotes: spec.changeNotes,
     coverLetter,
     positioningMemo: spec.positioningMemo,
-    tailoredResume: spec.resume,
+    tailoredResume,
     disclaimer: DISCLAIMER,
   };
 

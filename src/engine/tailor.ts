@@ -50,6 +50,11 @@ HOW TO TAILOR:
 - Keep it ATS-safe: plain text content only, standard section semantics. No tables, columns, or graphics
   (the renderer enforces layout — you only supply content).
 - Preserve all real employers, titles, and dates exactly.
+- OUTPUT EVERY WORK-EXPERIENCE ENTRY from the source resume, in the same order. Do NOT drop, merge,
+  omit, or summarize away ANY job, even older, shorter, or less-relevant ones. The tailored resume must
+  contain the SAME NUMBER of experience entries as the source. Dropping a job erases real tenure and
+  fails the candidate. Reword and reorder bullets WITHIN an entry, but keep every entry. Likewise keep
+  all education and certifications.
 
 ALSO PRODUCE:
 - injectedKeywords: job keywords you truthfully worked in.
@@ -85,9 +90,11 @@ Gaps detected by the ATS scorer:
 Reforge the resume for this role. Close the keyword gaps ONLY where the candidate's real
 experience supports it; list the rest in notAddressable.`;
 
-  // coverLetter is generated separately (writeCoverLetter) and runs in parallel, so this
-  // heavy call emits less text and finishes sooner. maxTokens trimmed to match.
-  return parseWith(TailoringSpec, { system: SYSTEM, content, maxTokens: 5120, model });
+  // coverLetter is generated separately (writeCoverLetter) and runs in parallel. maxTokens must
+  // be high enough to emit EVERY experience entry of a long résumé plus the memo/notes/keyword
+  // lists as complete JSON; too low and the output truncates (invalid JSON) or the model drops
+  // jobs to fit. It's a ceiling, not a target, so short résumés stay fast.
+  return parseWith(TailoringSpec, { system: SYSTEM, content, maxTokens: 8192, model });
 }
 
 /* ─────────────────────────────── Cover letter ──────────────────────────── */

@@ -44,5 +44,6 @@ export function parseResume(
     content = `Resume:\n\n${input.text ?? ""}`;
   }
 
-  return parseWith(ResumeModel, { system: SYSTEM, content, maxTokens: 4096, model });
+  // High enough to transcribe a dense multi-page résumé without truncating the structured JSON.
+  return parseWith(ResumeModel, { system: SYSTEM, content, maxTokens: 6144, model });
 }

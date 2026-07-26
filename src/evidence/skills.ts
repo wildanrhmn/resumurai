@@ -56,6 +56,23 @@ function cleanRole(role: string): string {
   return role.replace(/,.*$/, "").replace(/[-–—].*$/, "").trim();
 }
 
+// Modern digital-design titles that O*NET's alternate-title index maps to the WRONG occupation
+// ("Product Designer" -> Mechanical Drafters; "UI/UX Designer" -> QA Tester). Pin them to
+// 15-1255.00 "Web and Digital Interface Designers" — the occupation whose tech skills (Figma,
+// Adobe, Sketch, HTML/CSS) actually match this work. Keys are normTitle()-normalized.
+const ROLE_OVERRIDES: Record<string, string> = {
+  "product designer": "15-1255.00",
+  "digital product designer": "15-1255.00",
+  "ux designer": "15-1255.00",
+  "ui designer": "15-1255.00",
+  "ui ux designer": "15-1255.00",
+  "ux ui designer": "15-1255.00",
+  "digital designer": "15-1255.00",
+  "interaction designer": "15-1255.00",
+  "visual designer": "15-1255.00",
+  "web designer": "15-1255.00",
+};
+
 // Vendor/generic words that carry no signal in an O*NET technology name.
 const VENDOR = new Set([
   "software", "system", "systems", "amazon", "web", "services", "service", "microsoft", "apache",
@@ -81,6 +98,7 @@ function findSoc(role: string): { soc: string; exact: boolean } | null {
   const d = load();
   const q = normTitle(cleanRole(role));
   if (!q) return null;
+  if (ROLE_OVERRIDES[q]) return { soc: ROLE_OVERRIDES[q], exact: true };
   if (d.titles[q]) return { soc: d.titles[q], exact: true };
   const qt = q.split(" ").filter(Boolean);
   if (qt.length === 0) return null;

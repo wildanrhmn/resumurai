@@ -19,27 +19,10 @@ export async function tailorResume(input: TailorInput, opts: EngineOptions = {})
   return finalize(engine, opts);
 }
 
-// Evidence is independently-verified and best-effort. LanguageTool's public API can be slow
-// (retry + timeouts), and on the paid path we must not let it push the response past the
-// buyer's HTTP timeout. Cap the whole gather; if it overruns we ship the deliverable without
-// the evidence block (the resume, score, and artifacts — what the buyer paid for — are unaffected).
+// LanguageTool's public API can be slow (retry + timeouts). On the paid path we cap each
+// evidence source individually so a slow one drops on its own, while the instant deterministic
+// sources (re-parse, O*NET bundle, metrics) always make it into the response.
 const EVIDENCE_BUDGET_MS = () => Number(process.env.EVIDENCE_BUDGET_MS ?? 4500);
-
-function withBudget<T>(p: Promise<T>, ms: number, fallback: T): Promise<T> {
-  return new Promise((resolve) => {
-    const t = setTimeout(() => resolve(fallback), ms);
-    p.then(
-      (v) => {
-        clearTimeout(t);
-        resolve(v);
-      },
-      () => {
-        clearTimeout(t);
-        resolve(fallback);
-      },
-    );
-  });
-}
 
 /**
  * Turn an engine result into the full response: render the files and gather evidence
@@ -49,15 +32,12 @@ function withBudget<T>(p: Promise<T>, ms: number, fallback: T): Promise<T> {
 export async function finalize(engine: EngineResult, opts: EngineOptions = {}): Promise<TailorResult> {
   const artifacts = await buildArtifacts(engine);
   const docx = artifacts.find((a) => /-Resume\.docx$/i.test(a.filename));
-  const gather = gatherEvidence({
+  const evidence: Evidence[] = await gatherEvidence({
     role: engine.role,
     resume: engine.tailoredResume,
     docxBase64: docx?.base64,
-  });
-  // Only the latency-sensitive paid path caps evidence; quality mode waits for the full set.
-  const evidence: Evidence[] = opts.fast
-    ? await withBudget(gather, EVIDENCE_BUDGET_MS(), [])
-    : await gather.catch(() => []);
+    budgetMs: opts.fast ? EVIDENCE_BUDGET_MS() : undefined, // quality mode waits for the full set
+  }).catch(() => []);
   return { ...engine, evidence, artifacts };
 }
 

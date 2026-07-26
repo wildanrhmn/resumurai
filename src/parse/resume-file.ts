@@ -22,8 +22,9 @@ export async function extractPdfText(base64: string): Promise<string> {
   try {
     const buffer = Buffer.from(base64, "base64");
     const pdf = await getDocumentProxy(new Uint8Array(buffer));
+    // mergePages:true returns a single joined string.
     const { text } = await extractText(pdf, { mergePages: true });
-    return (typeof text === "string" ? text : text.join("\n")).trim();
+    return (text ?? "").trim();
   } catch {
     return "";
   }
